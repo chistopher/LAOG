@@ -29,23 +29,25 @@ unsigned int Graph::deg(const int v) const {
     return m_adj[v].size();
 }
 
+const std::vector<int> &Graph::neighbors(int v) const {
+    return m_adj[v];
+}
+
 void Graph::connect(int u, int v) {
     m_adj[u].push_back(v);
     m_adj[v].push_back(u);
     ++m_m;
 }
 
-std::vector<int> Graph::distances(int v, int additionalEdge = -1) const {
+std::vector<int> Graph::distances(int v, int additionalEdge) const {
     // act as if an additional edge from v is present in the graph
-    if(additionalEdge >= 0 && additionalEdge < n() && additionalEdge != v)
-        m_adj[v].push_back(additionalEdge);
+    if(additionalEdge >= 0 && additionalEdge < (int)n() && additionalEdge != v)
+        const_cast<Graph*>(this)->m_adj[v].push_back(additionalEdge);
 
-    const auto n = n();
-    auto visited = std::vector<bool>(n, false);
-    auto dist = std::vector<int>(n, -1);
+    const auto _n = n();
+    auto dist = std::vector<int>(_n, -1);
 
     std::list<int> queue;
-    visited[v] = true;
     dist[v] = 0;
     queue.push_back(v);
 
@@ -57,27 +59,31 @@ std::vector<int> Graph::distances(int v, int additionalEdge = -1) const {
 
         // queue all neighbors
         for (auto neighbor : m_adj[current])
-            if (!visited[neighbor])
+            if (dist[neighbor] == -1)
             {
-                visited[neighbor] = true;
                 dist[neighbor] = 1 + dist[current];
                 queue.push_back(neighbor);
             }
     }
 
     // remove the temporary edge again
-    if(additionalEdge >= 0 && additionalEdge < n() && additionalEdge != v)
-        m_adj[v].pop_back();
+    if(additionalEdge >= 0 && additionalEdge < (int)n() && additionalEdge != v)
+        const_cast<Graph*>(this)->m_adj[v].pop_back();
 
     return dist;
 }
 
 Graph Graph::createCircle(int size) {
-    auto circle = Graph(size);
-    for(int i=0; i<size-1; ++i)
-        circle.connect(i, i+1);
+    auto circle = createPath(size);
     circle.connect(0, size-1);
     return circle;
+}
+
+Graph Graph::createPath(int size) {
+    auto path = Graph(size);
+    for(int i=0; i<size-1; ++i)
+        path.connect(i, i+1);
+    return path;
 }
 
 // Wilson's Algorithm for uniform random spanning trees
@@ -122,12 +128,4 @@ std::ostream &operator<<(std::ostream &os, const Graph &graph) {
     os << '}' << std::endl;
     return os;
 }
-
-
-
-
-
-
-
-
 

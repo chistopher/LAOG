@@ -49,7 +49,6 @@ bool Network::performRound(bool random) {
 
 int Network::bestResponseTwoNeigh(int agent) {
     const auto n = m_graph.n();
-    auto adja = m_graph.m_adj;
 
     // bfs up to layer 3
     auto dist = std::vector<int>(n, -1);
@@ -68,7 +67,7 @@ int Network::bestResponseTwoNeigh(int agent) {
         if(dist[current] > 2) break;
 
         // queue all neighbors
-        for (auto neighbor : adja[current])
+        for (auto neighbor : m_graph.neighbors(current))
             if (!visited[neighbor])
             {
                 visited[neighbor] = true;
@@ -84,7 +83,7 @@ int Network::bestResponseTwoNeigh(int agent) {
     {
         int distGain = 0;
         double edgeCost = (this->*m_edgeCost)(m_graph.deg(i) + 1);
-        for(auto neighbor : adja[i])
+        for(auto neighbor : m_graph.neighbors(i))
             if(dist[neighbor] == 3) distGain++;
         auto realGain = distGain - edgeCost;
         if(realGain > bestGain){
@@ -97,19 +96,32 @@ int Network::bestResponseTwoNeigh(int agent) {
 }
 
 int Network::bestResponseSumDist(int agent) {
-    auto& neigh = m_
-    auto dist = m_graph.distances(agent); // should be no -1 coz connected
 
-    auto currentCost = std::accumulate(dist.begin(), dist.end(), 0); // dist cost
-    currentCost += std::accumulate(m_graph.m_adj[agent].begin(), m_graph.m_adj[agent].end(), );
-    for(int i = 0; i < m_graph.n(); ++i)
+    auto dist = m_graph.distances(agent); // should be no -1 coz connected
+    auto currentDistCost = std::accumulate(dist.begin(), dist.end(), 0); // dist cost
+    auto currentEdgeCost = 0.0;
+    for(auto neigh : m_graph.neighbors(agent))
+        currentEdgeCost += (this->*m_edgeCost)(m_graph.deg(neigh)); // edge cost
+
+    auto bestResponse = -1;
+    auto bestCost = currentDistCost + currentEdgeCost;
+
+    for(int i = 0; i < (int)m_graph.n(); ++i)
     {
         if(dist[i] != 2)
             continue;
-        m_graph.m_adj[agent].push_back(i); // add edge
+        auto newDists = m_graph.distances(agent, i);
+        auto newDistCost = std::accumulate(newDists.begin(), newDists.end(), 0);
+        auto newEdgeCost = currentEdgeCost + (this->*m_edgeCost)(m_graph.deg(i)+1);
+        auto newCost = newDistCost + newEdgeCost;
+        if(newDistCost + newEdgeCost < bestCost)
+        {
+            bestResponse = i;
+            bestCost = newCost;
+        }
 
     }
-
+    return bestResponse;
 }
 
 double Network::linearCost(int deg) {

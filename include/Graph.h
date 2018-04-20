@@ -13,6 +13,7 @@ public:
     unsigned int n() const;
     unsigned int m() const;
     unsigned int deg(const int v) const;
+    const std::vector<int>& neighbors(int v) const;
 
     void connect(int u, int v);
 
@@ -27,7 +28,7 @@ public:
     static Graph createPath(int size);
     static Graph createRandomTree(int size);
 
-public:
+protected:
     std::vector<std::vector<int>> m_adj; // adjacency list
     unsigned int m_m = 0;
 };

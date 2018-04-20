@@ -11,9 +11,11 @@ using namespace std;
 
 int main(int argc, char* argv[]){
 
-    auto network = Network(Graph::createRandomTree(100), &Network::bestResponseTwoNeigh);
+
+    auto network = Network(Graph::createCircle(1000), &Network::bestResponseSumDist);
     network.m_alpha = 0.5;
     network.m_c = -1;
+
     while(!network.performRound(true))
         cout << "finished round " << network.m_round << endl;
     cout << "network converged" << endl;
