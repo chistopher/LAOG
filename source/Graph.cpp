@@ -47,22 +47,24 @@ std::vector<int> Graph::distances(int v, int additionalEdge) const {
     const auto _n = n();
     auto dist = std::vector<int>(_n, -1);
 
-    std::list<int> queue;
+    auto queue = std::vector<int>(_n, -1);
+    auto q_start = 0;
+    auto q_end = 0;
+    queue[q_end++] = v; // queue.push_back(v);
     dist[v] = 0;
-    queue.push_back(v);
+    
 
     // do normal bfs
-    while(!queue.empty())
+    while(q_start < q_end)
     {
-        auto current = queue.front();
-        queue.pop_front();
+        auto current = queue[q_start++];
 
         // queue all neighbors
         for (auto neighbor : m_adj[current])
             if (dist[neighbor] == -1)
             {
                 dist[neighbor] = 1 + dist[current];
-                queue.push_back(neighbor);
+                queue[q_end++] = neighbor;
             }
     }
 
