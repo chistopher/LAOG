@@ -48,39 +48,16 @@ bool Network::performRound(bool random) {
 }
 
 int Network::bestResponseTwoNeigh(int agent) {
-    const auto n = m_graph.n();
+    const int n = m_graph.n();
 
     // bfs up to layer 3
-    auto dist = std::vector<int>(n, -1);
-    auto visited = std::vector<bool>(n,false);
-    auto dist2Nodes = std::vector<int>();
-
-    std::list<int> queue;
-    visited[agent] = true;
-    dist[agent] = 0;
-    queue.push_back(agent);
-
-    while(!queue.empty())
-    {
-        auto current = queue.front();
-        queue.pop_front();
-        if(dist[current] > 2) break;
-
-        // queue all neighbors
-        for (auto neighbor : m_graph.neighbors(current))
-            if (!visited[neighbor])
-            {
-                visited[neighbor] = true;
-                queue.push_back(neighbor);
-                dist[neighbor] = dist[current] + 1;
-                if(dist[neighbor] == 2) dist2Nodes.push_back(neighbor);
-            }
-    }
+    auto dist = m_graph.distances(agent, 3);
 
     int bestResponse = -1;
     double bestGain = 0;
-    for(auto i : dist2Nodes)
+    for(int i = 0; i<n; ++i)
     {
+        if(dist[i] != 2) continue;
         int distGain = 0;
         double edgeCost = (this->*m_edgeCost)(m_graph.deg(i) + 1);
         for(auto neighbor : m_graph.neighbors(i))
@@ -97,21 +74,30 @@ int Network::bestResponseTwoNeigh(int agent) {
 
 int Network::bestResponseSumDist(int agent) {
 
-    auto dist = m_graph.distances(agent); // should be no -1 coz connected
-    auto currentDistCost = std::accumulate(dist.begin(), dist.end(), 0); // dist cost
+    auto dist = m_graph.distances(agent); // should not be -1 coz connected
+    auto maxDist = 0;
+    // dist cost
+    auto currentDistCost = 0; 
+    for (auto each : dist) {
+        currentDistCost += each;
+        maxDist = std::max(maxDist, each);
+    }
+    // edge cost 
     auto currentEdgeCost = 0.0;
     for(auto neigh : m_graph.neighbors(agent))
-        currentEdgeCost += (this->*m_edgeCost)(m_graph.deg(neigh)); // edge cost
+        currentEdgeCost += (this->*m_edgeCost)(m_graph.deg(neigh)); 
 
     auto bestResponse = -1;
     auto bestCost = currentDistCost + currentEdgeCost;
 
     for(int i = 0; i < (int)m_graph.n(); ++i)
     {
-        if(dist[i] != 2)
-            continue;
-        auto newDists = m_graph.distances(agent, i);
+        // only dist 2 vertices are relevant
+        if(dist[i] != 2) continue; 
+        // dist cost if edge (agent, i) is present
+        auto newDists = m_graph.distancesWithEdge(agent, i, maxDist); 
         auto newDistCost = std::accumulate(newDists.begin(), newDists.end(), 0);
+        // edge cost (only add cost of new edge)
         auto newEdgeCost = currentEdgeCost + (this->*m_edgeCost)(m_graph.deg(i)+1);
         auto newCost = newDistCost + newEdgeCost;
         if(newDistCost + newEdgeCost < bestCost)

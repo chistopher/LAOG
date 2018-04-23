@@ -17,9 +17,11 @@ public:
 
     void connect(int u, int v);
 
-    // returns distances of each node to v or -1 if reachable
-    // if additionalEdge is a valid index then the edge (v, addEdge) is also considered
-    std::vector<int> distances(int v, int additionalEdge = -1) const;
+    // returns distances of each node to v or -1 if not reachable
+    std::vector<int> distances(int v, int maxLayer = -1) const;
+
+    // the edge (v, addEdge) is also considered
+    std::vector<int> distancesWithEdge(int v, int additionalEdge, int maxLayer = -1) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Graph& graph);
 
@@ -30,5 +32,6 @@ public:
 
 protected:
     std::vector<std::vector<int>> m_adj; // adjacency list
+    unsigned int m_n;
     unsigned int m_m = 0;
 };

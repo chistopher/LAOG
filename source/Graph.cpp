@@ -8,16 +8,19 @@
 
 Graph::Graph(int size) {
     m_adj.resize(size);
+    m_n = size;
 }
 
 Graph::Graph(Graph&& other)
 : m_adj(std::move(other.m_adj)),
+  m_n(other.m_n),
   m_m(other.m_m)
 {
 }
 
 unsigned int Graph::n() const {
-    return m_adj.size();
+    assert(m_adj.size() == m_n);
+    return m_n;
 }
 
 unsigned int Graph::m() const {
@@ -39,38 +42,49 @@ void Graph::connect(int u, int v) {
     ++m_m;
 }
 
-std::vector<int> Graph::distances(int v, int additionalEdge) const {
-    // act as if an additional edge from v is present in the graph
-    if(additionalEdge >= 0 && additionalEdge < (int)n() && additionalEdge != v)
-        const_cast<Graph*>(this)->m_adj[v].push_back(additionalEdge);
+std::vector<int> Graph::distances(int v, int maxLayer) const {
+    // if no maxLayer given do full bfs
+    if(maxLayer < 0)
+        maxLayer = m_n -1;
 
-    const auto _n = n();
-    auto dist = std::vector<int>(_n, -1);
+    auto dist = std::vector<int>(m_n, -1);
 
-    auto queue = std::vector<int>(_n, -1);
+    auto queue = std::vector<int>(m_n, -1);
     auto q_start = 0;
     auto q_end = 0;
+
     queue[q_end++] = v; // queue.push_back(v);
     dist[v] = 0;
-    
 
     // do normal bfs
-    while(q_start < q_end)
+    while(q_start < q_end) // !queue.empty()
     {
-        auto current = queue[q_start++];
+        auto current = queue[q_start++]; // queue.pop_front()
+        
+        // skip last layer since it does not change any distances
+        if (dist[current] >= maxLayer) 
+            break;
 
         // queue all neighbors
         for (auto neighbor : m_adj[current])
             if (dist[neighbor] == -1)
             {
                 dist[neighbor] = 1 + dist[current];
-                queue[q_end++] = neighbor;
+                queue[q_end++] = neighbor; // queue.push_back(v);
             }
     }
 
+    return dist;
+}
+
+std::vector<int> Graph::distancesWithEdge(int v, int additionalEdge, int maxLayer) const {
+    // act as if an additional edge from v is present in the graph
+    const_cast<Graph*>(this)->m_adj[v].push_back(additionalEdge);
+
+    auto dist = distances(v, maxLayer);
+
     // remove the temporary edge again
-    if(additionalEdge >= 0 && additionalEdge < (int)n() && additionalEdge != v)
-        const_cast<Graph*>(this)->m_adj[v].pop_back();
+    const_cast<Graph*>(this)->m_adj[v].pop_back();
 
     return dist;
 }
