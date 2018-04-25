@@ -62,7 +62,7 @@ int Network::bestResponseTwoNeigh(int agent) {
         int distGain = 0;
         double edgeCost = (this->*m_edgeCost)(m_graph.deg(i) + 1);
         for(auto neighbor : m_graph.neighbors(i))
-            if(dist[neighbor] == 3) distGain++;
+            if(dist[neighbor] == 3) ++distGain;
         auto realGain = distGain - edgeCost;
         if(realGain > bestGain){
             bestResponse = i;

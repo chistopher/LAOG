@@ -81,7 +81,8 @@ std::vector<int> Graph::distancesWithEdge(int v, int additionalEdge, int maxLaye
     // copy old dists
     auto dist = oldDists;
 
-    std::vector<int> queue(m_n);
+    static std::vector<int> queue(m_n);
+    queue.reserve(m_n);
     auto q_start = 0;
     auto q_end = 0;
 

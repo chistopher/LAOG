@@ -12,16 +12,15 @@ using namespace std;
 
 int main(int argc, char* argv[]){
 
-    auto network = Network(Graph::createCircle(1000), &Network::bestResponseTwoNeigh, &Network::linearCost);
+    auto network = Network(Graph::createRandomTree(1000), &Network::bestResponseTwoNeigh, &Network::linearCost);
     network.m_alpha = 0.49;
     network.m_c = 0.0;
-    auto starting = "circle";
+    auto starting = "";
 
-    network.save_gexf(starting);
-    while(!network.performRound(true)){
-        cout << "finished round " << network.m_round << endl;
-        network.save_gexf(starting);
-    }
+    do {
+        // network.save_gexf(starting);
+        cout << "starting round " << network.m_round + 1 << endl;
+    } while (!network.performRound(true));
     cout << "network converged" << endl;
 
     return 0;
