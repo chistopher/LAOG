@@ -1,4 +1,6 @@
 
+#include <string>
+
 #include <Graph.h>
 
 
@@ -25,6 +27,10 @@ public:
 
     double linearCost(int deg);
     double polyCost(int deg);
+
+    std::string filename(const char* startingGraph, const char* ext) const;
+    void save_dot(const char* startingGraph) const;
+    void save_gexf(const char* startingGraph) const;
 
 protected:
     BestResponseFunction m_bestResponse;

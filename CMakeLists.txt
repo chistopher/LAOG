@@ -12,20 +12,19 @@ add_compile_options(
 
 
 SET(HEADERS
-
-
-        include/Graph.h include/Network.h)
+        include/Graph.h
+        include/Network.h)
 
 
 set(SOURCE_FILES
-
-
-        source/Graph.cpp source/Network.cpp)
+        source/Graph.cpp
+        source/Network.cpp)
 
 
 set(EXECUTABLE_FILES
         scripts/testing.cpp
         scripts/Graph_test.cpp
+        scripts/sumDistBenchmark.cpp
         )
 
 

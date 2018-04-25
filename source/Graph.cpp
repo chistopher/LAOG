@@ -49,7 +49,7 @@ std::vector<int> Graph::distances(int v, int maxLayer) const {
 
     auto dist = std::vector<int>(m_n, -1);
 
-    auto queue = std::vector<int>(m_n, -1);
+    std::vector<int> queue(m_n);
     auto q_start = 0;
     auto q_end = 0;
 
@@ -77,15 +77,34 @@ std::vector<int> Graph::distances(int v, int maxLayer) const {
     return dist;
 }
 
-std::vector<int> Graph::distancesWithEdge(int v, int additionalEdge, int maxLayer) const {
-    // act as if an additional edge from v is present in the graph
-    const_cast<Graph*>(this)->m_adj[v].push_back(additionalEdge);
+std::vector<int> Graph::distancesWithEdge(int v, int additionalEdge, int maxLayer, const std::vector<int> & oldDists) const {
+    // copy old dists
+    auto dist = oldDists;
 
-    auto dist = distances(v, maxLayer);
+    std::vector<int> queue(m_n);
+    auto q_start = 0;
+    auto q_end = 0;
 
-    // remove the temporary edge again
-    const_cast<Graph*>(this)->m_adj[v].pop_back();
+    queue[q_end++] = additionalEdge; // queue.push_back(v);
+    dist[additionalEdge] = 1; // act as if there is a new edge
 
+    // bfs part
+    while(q_start < q_end) // !queue.empty()
+    {
+        auto current = queue[q_start++]; // queue.pop_front()
+
+        // skip last layer since it does not change any distances
+        if (dist[current] >= maxLayer)
+            break;
+
+        // only update distances that get smaller because of the new edge
+        for (auto neighbor : m_adj[current])
+            if (1 + dist[current] < dist[neighbor])
+            {
+                dist[neighbor] = 1 + dist[current];
+                queue[q_end++] = neighbor; // queue.push_back(v);
+            }
+    }
     return dist;
 }
 
