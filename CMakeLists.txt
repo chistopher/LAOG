@@ -30,10 +30,10 @@ set(EXECUTABLE_FILES
 
 
 include_directories(./include)
-add_library(lib STATIC ${SOURCE_FILES} ${HEADERS})
+add_library(laog STATIC ${SOURCE_FILES} ${HEADERS})
 foreach(file ${EXECUTABLE_FILES})
     get_filename_component(executable ${file} NAME_WE)
     add_executable(${executable} ${file})
     target_compile_options(${executable} PRIVATE -O3)
-    target_link_libraries(${executable} lib)
+    target_link_libraries(${executable} laog)
 endforeach()

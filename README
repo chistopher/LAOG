@@ -1,0 +1,10 @@
+build instructions:
+
+cd <repoDir>
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make -j 4
+
+for help use
+./laogen --help
