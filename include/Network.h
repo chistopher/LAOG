@@ -49,4 +49,5 @@ public:
     double m_alpha = 0.4; // factor for linear or exponent for poly
     double m_c = 0.0;
 
+    int m_seed = 1337;
 };

@@ -38,7 +38,7 @@ bool Network::performRound(bool random) {
         for(unsigned int i=0; i<n; ++i)
             activateAgent(i);
     } else { // random
-        static auto gen = std::mt19937(1337);
+        static auto gen = std::mt19937(m_seed);
         auto order = std::vector<int>(n);
         std::iota(order.begin(), order.end(), 0);
         std::shuffle(order.begin(), order.end(), gen);

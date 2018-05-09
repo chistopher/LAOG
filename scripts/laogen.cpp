@@ -1,9 +1,7 @@
 
 #include <iostream>
-#include <fstream>
-#include <cassert>
-#include <string>
 #include <map>
+#include <string>
 #include <cstring>
 
 #include <Graph.h>
@@ -14,8 +12,6 @@ using namespace std;
 
 map<string, string> parseArgs(int argc, char** argv){
     map<string, string> params;
-    params["start"] = "circle";
-    params["n"] = "1000";
     for (int i=1; i<argc; i++) {
         // Get current and next argument
         if(argv[i][0] != '-')
@@ -23,77 +19,69 @@ map<string, string> parseArgs(int argc, char** argv){
         std::string arg  = argv[i]+1; // +1 to skip the -
         std::string next = (i+1 < argc ? argv[i+1] : "");
 
-        params[std::move(arg)] = std::move(next);
-        ++i;
+        // advance one additional position if next is used
+        if(next.length() == 0 || next.front() == '-'){
+            params[std::move(arg)] = "1";
+        } else {
+            params[std::move(arg)] = std::move(next);
+            ++i;
+        }
     }
     return params;
 }
 
 
 int main(int argc, char* argv[]){
+
     if(argc < 2 || 0 == strcmp(argv[1], "--help") || 0 == strcmp(argv[1], "-help")){
-        clog << "usage: ./laogen [-n anInt]\t\t  // number of nodes\n"
-             << "\t\t[-dist dist|two]          // distance cost function\n"
-             << "\t\t[-cost linear|poly]       // edge cost function\n"
-             << "\t\t[-a aFloat]               // factor or exponent for degree in edge cost\n"
-             << "\t\t[-c aFloat]               // constant offset for edge cost\n"
-             << "\t\t[-start circle|tree|path] // starting graph configuration\n"
-             << "\t\t[-greedy 0|1]             // best response or greedy\n"
-             << "\t\t[-gexf 0|1]               // save in gexf format (also intermediate saves)\n"
-             << "\t\t[-path aPath]             // path where the graph(s) should be saved\n";
+        clog << "usage: ./laogen [-n anInt]\t\t  // number of nodes               default 1000\n"
+             << "\t\t[-dist dist|two]          // distance cost function        default two\n"
+             << "\t\t[-cost linear|poly]       // edge cost function            default linear\n"
+             << "\t\t[-a aFloat]               // factor or exponent for cost   default 0.4\n"
+             << "\t\t[-c aFloat]               // constant offset for edge cost default 0.0\n"
+             << "\t\t[-start circle|tree|path] // starting graph configuration  default circle\n"
+             << "\t\t[-greedy 0|1]             // best response or greedy       default 0\n"
+             << "\t\t[-random 0|1]             // enables random scheduling     default 1\n"
+             << "\t\t[-seed anInt]             // seed for random scheduling    default 1337\n"
+             << "\t\t[-gexf 0|1]               // save intermediates as gexf    default 0\n"
+             << "\t\t[-path aPath]             // path for output graph(s)      default .\n";
         return 0;
     }
 
+    // read params
     auto params = parseArgs(argc, argv);
-
-    // choose starting graph
-    auto starting = params["start"];
-    auto graph = (starting == "path") ? Graph::createPath(stoi(params["n"])) :
-                 ((starting == "tree") ? Graph::createRandomTree(stoi(params["n"])) :
-                 Graph::createCircle(stoi(params["n"])));
-
-    // choose dist metric
-    auto dist = &Network::bestResponseTwoNeigh;
-    if(params["dist"] == "dist")
-        dist = &Network::bestResponseSumDist;
-
-    // choose edge cost metric
-    auto cost = &Network::linearCost;
-    if(params["cost"] == "poly")
-        cost = &Network::polyCost;
-
-    auto greedy = false;
-    if(params["greedy"] == "1")
-        greedy = true;
-
-    auto a = 0.4;
-    if(params["a"] != "")
-        a = stod(params["a"]);
-
-    auto c = 0.0;
-    if(params["c"] != "")
-        c = stod(params["c"]);
-
+    auto n = !params["n"].empty() ? stoi(params["n"]) : 1000;
+    auto start = !params["start"].empty() ? params["start"] : "circle";
+    auto graph = (start == "path") ? Graph::createPath(n) :
+                 ((start == "tree") ? Graph::createRandomTree(n) :
+                 Graph::createCircle(n));
+    auto dist = params["dist"] == "dist" ? &Network::bestResponseSumDist : &Network::bestResponseTwoNeigh;
+    auto cost = params["cost"] == "poly" ? &Network::polyCost : &Network::linearCost;
+    auto a = !params["a"].empty() ? stod(params["a"]) : 0.4;
+    auto c = !params["c"].empty() ? stod(params["c"]) : 0.0;
+    auto greedy = params["greedy"] == "1";
+    auto random = params["random"] != "0";
+    auto seed = !params["seed"].empty() ? stoi(params["seed"]) : 1337;
+    auto save_intermediate = params["gexf"] == "1";
     string path = ".";
-    if(params["path"] != "") {
+    if(!params["path"].empty()) {
         path = params["path"];
         if(path.back() == '/' && path.length() > 1)
             path.pop_back();
     }
 
-    auto save_intermediate = params["gexf"] == "1";
-
     // DO STUFF
-    auto network = Network(move(graph), dist, cost, starting);
+    auto network = Network(move(graph), dist, cost, start);
     network.m_alpha = a;
     network.m_c = c;
     network.m_greedy = greedy;
+    network.m_seed = seed;
 
     do {
         if(save_intermediate)
             network.save_gexf(path);
         clog << "starting round " << network.m_round + 1 << endl;
-    } while (!network.performRound(true));
+    } while (!network.performRound(random));
     clog << "network converged in " << network.m_round - 1 << " round(s)" << endl;
 
     if(!save_intermediate)
