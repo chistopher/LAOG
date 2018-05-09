@@ -10,10 +10,11 @@
 #include <sstream>
 
 
-Network::Network(Graph&& startingGraph, BestResponseFunction bestResponse, EdgeCostFunction edgeCost)
+Network::Network(Graph&& startingGraph, BestResponseFunction bestResponse, EdgeCostFunction edgeCost, std::string startingName)
 : m_bestResponse(bestResponse),
   m_edgeCost(edgeCost),
-  m_graph(std::move(startingGraph))
+  m_graph(std::move(startingGraph)),
+  m_startingName(std::move(startingName))
 {
 }
 
@@ -65,6 +66,7 @@ int Network::bestResponseTwoNeigh(int agent) {
             if(dist[neighbor] == 3) ++distGain;
         auto realGain = distGain - edgeCost;
         if(realGain > bestGain){
+            if (m_greedy) return i;
             bestResponse = i;
             bestGain = realGain;
         }
@@ -75,7 +77,7 @@ int Network::bestResponseTwoNeigh(int agent) {
 
 int Network::bestResponseSumDist(int agent) {
 
-    auto dist = m_graph.distances(agent); // should not be -1 coz connected
+    const auto dist = m_graph.distances(agent); // should not be -1 coz connected
     auto maxDist = 0;
     // dist cost
     auto currentDistCost = 0; 
@@ -103,6 +105,7 @@ int Network::bestResponseSumDist(int agent) {
         auto newCost = newDistCost + newEdgeCost;
         if(newDistCost + newEdgeCost < bestCost)
         {
+            if (m_greedy) return i;
             bestResponse = i;
             bestCost = newCost;
         }
@@ -116,32 +119,28 @@ double Network::linearCost(int deg) {
 }
 
 double Network::polyCost(int deg) {
-    return std::pow(deg, m_beta);
+    return std::max(0.0, std::pow(deg-1, m_alpha) + m_c);
 }
 
-std::string Network::filename(const char* startingGraph, const char* ext) const{
+std::string Network::filename() const{
     std::ostringstream ss;
     ss.precision(2);
     ss << std::fixed;
     ss << ((m_bestResponse == &Network::bestResponseSumDist) ? "sumDist" : "twoNeigh");
     ss << '_' << m_graph.n();
-    if (m_edgeCost == &Network::linearCost)
-        ss << '_' << "linear" << m_alpha << '_' << m_c;
-    else
-        ss << '_' << "poly" << m_beta << '_' << m_beta;
-    ss << '_' << startingGraph;
-    ss << '_' << "round" << m_round;
-    ss << ext;
+    ss << (m_edgeCost == &Network::linearCost ? "_linear" : "_poly");
+    ss << m_alpha << '_' << m_c;
+    ss << '_' << m_startingName;
     return ss.str();
 }
 
-void Network::save_dot(const char* startingGraph) const{
-    std::ofstream file(filename(startingGraph, ".dot"));
+void Network::save_dot(std::string path) const{
+    std::ofstream file(path + "/" + filename() + ".dot");
     file << graph();
 }
 
-void Network::save_gexf(const char* startingGraph) const{
-    std::ofstream file(filename(startingGraph, ".gexf"));
+void Network::save_gexf(std::string path) const{
+    std::ofstream file(path + "/" + filename() + "_round" + std::to_string(m_round) + ".gexf");
     file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     file << "<gexf version=\"1.3\">\n";
     file << "<graph mode=\"slice\" defaultedgetype=\"undirected\" timerepresentation=\"timestamp\" timestamp=\"" << m_round << "\">\n";

@@ -12,7 +12,8 @@ public:
 
     Network(Graph&& startingGraph,
             BestResponseFunction bestResponse = &Network::bestResponseTwoNeigh,
-            EdgeCostFunction edgeCost = &Network::linearCost);
+            EdgeCostFunction edgeCost = &Network::linearCost,
+            std::string startingName = "unknown");
 
     const Graph& graph() const;
 
@@ -28,21 +29,24 @@ public:
     double linearCost(int deg);
     double polyCost(int deg);
 
-    std::string filename(const char* startingGraph, const char* ext) const;
-    void save_dot(const char* startingGraph) const;
-    void save_gexf(const char* startingGraph) const;
+    std::string filename() const;
+    void save_dot(std::string path = ".") const;
+    void save_gexf(std::string path = ".") const;
 
 protected:
     BestResponseFunction m_bestResponse;
     EdgeCostFunction m_edgeCost;
 
     Graph m_graph;
+    std::string m_startingName;
 
 public:
     unsigned int m_round = 0;
     bool m_converged = false;
 
-    double m_alpha = 0.4;
-    double m_c = -1.0;
-    double m_beta = 0.8;
+    bool m_greedy = false;
+
+    double m_alpha = 0.4; // factor for linear or exponent for poly
+    double m_c = 0.0;
+
 };

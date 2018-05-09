@@ -25,6 +25,7 @@ set(EXECUTABLE_FILES
         scripts/testing.cpp
         scripts/Graph_test.cpp
         scripts/sumDistBenchmark.cpp
+        scripts/laogen.cpp
         )
 
 

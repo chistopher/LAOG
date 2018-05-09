@@ -20,8 +20,9 @@ release_build
 /bin
 /lib
 /install
-/cmake-build-debug/
+/cmake-build-debug
 /cmake-build-release
+/cmake-build-relwithdebinfo
 
 # IDE project files
 *.sublime-project
