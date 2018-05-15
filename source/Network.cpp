@@ -80,15 +80,15 @@ int Network::bestResponseSumDist(int agent) {
     const auto dist = m_graph.distances(agent); // should not be -1 coz connected
     auto maxDist = 0;
     // dist cost
-    auto currentDistCost = 0; 
+    auto currentDistCost = 0;
     for (auto each : dist) {
         currentDistCost += each;
         maxDist = std::max(maxDist, each);
     }
-    // edge cost 
+    // edge cost
     auto currentEdgeCost = 0.0;
     for(auto neigh : m_graph.neighbors(agent))
-        currentEdgeCost += (this->*m_edgeCost)(m_graph.deg(neigh)); 
+        currentEdgeCost += (this->*m_edgeCost)(m_graph.deg(neigh));
 
     auto bestResponse = -1;
     auto bestCost = currentDistCost + currentEdgeCost;
@@ -96,7 +96,7 @@ int Network::bestResponseSumDist(int agent) {
     for(int i = 0; i < (int)m_graph.n(); ++i)
     {
         // only dist 2 vertices are relevant
-        if(dist[i] != 2) continue; 
+        if(dist[i] != 2) continue;
         // dist cost if edge (agent, i) is present
         auto newDists = m_graph.distancesWithEdge(agent, i, maxDist, dist);
         auto newDistCost = std::accumulate(newDists.begin(), newDists.end(), 0);
@@ -129,8 +129,9 @@ std::string Network::filename() const{
     ss << ((m_bestResponse == &Network::bestResponseSumDist) ? "sumDist" : "twoNeigh");
     ss << '_' << m_graph.n();
     ss << (m_edgeCost == &Network::linearCost ? "_linear" : "_poly");
-    ss << m_alpha << '_' << m_c;
+    ss << '_' << m_alpha << '_' << m_c;
     ss << '_' << m_startingName;
+    ss << '_' << std::to_string(m_round);
     return ss.str();
 }
 
@@ -140,7 +141,7 @@ void Network::save_dot(std::string path) const{
 }
 
 void Network::save_gexf(std::string path) const{
-    std::ofstream file(path + "/" + filename() + "_round" + std::to_string(m_round) + ".gexf");
+    std::ofstream file(path + "/" + filename() + ".gexf");
     file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     file << "<gexf version=\"1.3\">\n";
     file << "<graph mode=\"slice\" defaultedgetype=\"undirected\" timerepresentation=\"timestamp\" timestamp=\"" << m_round << "\">\n";
