@@ -38,10 +38,9 @@ bool Network::performRound(bool random) {
         for(unsigned int i=0; i<n; ++i)
             activateAgent(i);
     } else { // random
-        static auto gen = std::mt19937(m_seed);
         auto order = std::vector<int>(n);
         std::iota(order.begin(), order.end(), 0);
-        std::shuffle(order.begin(), order.end(), gen);
+        std::shuffle(order.begin(), order.end(), m_rand);
         for(auto each : order)
             activateAgent(each);
     }
@@ -122,6 +121,10 @@ double Network::polyCost(int deg) {
     return std::max(0.0, std::pow(deg-1, m_alpha) + m_c);
 }
 
+void Network::seed(unsigned int seed) {
+    m_rand.seed(seed);
+}
+
 std::string Network::filename() const{
     std::ostringstream ss;
     ss.precision(2);
@@ -135,13 +138,15 @@ std::string Network::filename() const{
     return ss.str();
 }
 
-void Network::save_dot(std::string path) const{
-    std::ofstream file(path + "/" + filename() + ".dot");
+void Network::save_dot(std::string name) const{
+    if(name.empty()) name = filename();
+    std::ofstream file(name + ".dot");
     file << graph();
 }
 
-void Network::save_gexf(std::string path) const{
-    std::ofstream file(path + "/" + filename() + ".gexf");
+void Network::save_gexf(std::string name) const{
+    if(name.empty()) name = filename();
+    std::ofstream file(name + ".gexf");
     file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     file << "<gexf version=\"1.3\">\n";
     file << "<graph mode=\"slice\" defaultedgetype=\"undirected\" timerepresentation=\"timestamp\" timestamp=\"" << m_round << "\">\n";

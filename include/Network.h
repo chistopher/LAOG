@@ -1,5 +1,6 @@
 
 #include <string>
+#include <random>
 
 #include <Graph.h>
 
@@ -29,9 +30,11 @@ public:
     double linearCost(int deg);
     double polyCost(int deg);
 
+    void seed(unsigned int seed);
+
     std::string filename() const;
-    void save_dot(std::string path = ".") const;
-    void save_gexf(std::string path = ".") const;
+    void save_dot(std::string name = "") const;
+    void save_gexf(std::string name = "") const;
 
 protected:
     BestResponseFunction m_bestResponse;
@@ -39,6 +42,7 @@ protected:
 
     Graph m_graph;
     std::string m_startingName;
+    std::mt19937 m_rand;
 
 public:
     unsigned int m_round = 0;
@@ -48,6 +52,4 @@ public:
 
     double m_alpha = 0.4; // factor for linear or exponent for poly
     double m_c = 0.0;
-
-    int m_seed = 1337;
 };

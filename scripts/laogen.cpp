@@ -44,7 +44,7 @@ int main(int argc, char* argv[]){
              << "\t\t[-random 0|1]             // enables random scheduling     default 1\n"
              << "\t\t[-seed anInt]             // seed for random scheduling    default 1337\n"
              << "\t\t[-gexf 0|1]               // save intermediates as gexf    default 0\n"
-             << "\t\t[-path aPath]             // path for output graph(s)      default .\n";
+             << "\t\t[-file aString]           // file name for output graph    default a good one\n";
         return 0;
     }
 
@@ -63,29 +63,24 @@ int main(int argc, char* argv[]){
     auto random = params["random"] != "0";
     auto seed = !params["seed"].empty() ? stoi(params["seed"]) : 1337;
     auto save_intermediate = params["gexf"] == "1";
-    string path = ".";
-    if(!params["path"].empty()) {
-        path = params["path"];
-        if(path.back() == '/' && path.length() > 1)
-            path.pop_back();
-    }
+    auto file = params["file"];
 
     // DO STUFF
     auto network = Network(move(graph), dist, cost, start);
     network.m_alpha = a;
     network.m_c = c;
     network.m_greedy = greedy;
-    network.m_seed = seed;
+    network.seed(seed);
 
     do {
         if(save_intermediate)
-            network.save_gexf(path);
+            network.save_gexf(file);
         clog << "starting round " << network.m_round + 1 << endl;
     } while (!network.performRound(random));
     clog << "network converged in " << network.m_round - 1 << " round(s)" << endl;
 
     if(!save_intermediate)
-        network.save_dot(path);
+        network.save_dot(file);
 
     return 0;
 }
