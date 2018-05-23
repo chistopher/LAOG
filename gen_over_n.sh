@@ -1,12 +1,10 @@
 #!/bin/bash
 
-listOfN="1000
-2000
-3000"
+listOfN=$(seq 1000 500 1500)
 
 dist="two"
 cost="linear"
-a="0.45"
+a="0.46"
 c="0.0"
 start="circle"
 
