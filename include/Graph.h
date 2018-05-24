@@ -20,8 +20,8 @@ public:
     // returns distances of each node to v or -1 if not reachable
     std::vector<int> distances(int v, int maxLayer = -1) const;
 
-    // recompute oldDists as if the edge (v,additionalEdge) was inserted; maxLayer should be max of oldDists
-    std::vector<int> distancesWithEdge(int v, int additionalEdge, int maxLayer, const std::vector<int> & oldDists) const;
+    // compute distance improvement if the edge (v,additionalEdge) is inserted; maxLayer should be max of oldDists
+    int distImprovementOfEdge(int v, int additionalEdge, int maxLayer, const std::vector<int> & oldDists) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Graph& graph);
 

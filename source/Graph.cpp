@@ -77,36 +77,52 @@ std::vector<int> Graph::distances(int v, int maxLayer) const {
     return dist;
 }
 
-std::vector<int> Graph::distancesWithEdge(int v, int additionalEdge, int maxLayer, const std::vector<int> & oldDists) const {
-    // copy old dists
-    auto dist = oldDists;
+int Graph::distImprovementOfEdge(int v, int additionalEdge, int maxLayer, const std::vector<int> & oldDists) const {
+
+    // remove constness from oldDists but we revert all changes back later
+    auto & dist = const_cast<std::vector<int>&>(oldDists);
+    static std::vector<std::pair<int,int>> oldEntries;
+    oldEntries.reserve(m_n);
 
     static std::vector<int> queue(m_n);
     queue.reserve(m_n);
     auto q_start = 0;
     auto q_end = 0;
 
-    queue[q_end++] = additionalEdge; // queue.push_back(v);
+    queue[q_end++] = additionalEdge; // queue.push_back();
+    oldEntries.emplace_back(additionalEdge, dist[additionalEdge]); // save old value
     dist[additionalEdge] = 1; // act as if there is a new edge
 
     // bfs part
     while(q_start < q_end) // !queue.empty()
     {
-        auto current = queue[q_start++]; // queue.pop_front()
+        auto current = queue[q_start++]; // auto current = queue.pop_front()
 
-        // skip last layer since it does not change any distances
-        if (dist[current] >= maxLayer)
+        // break on maxlayer-1 coz all neighbors later nodes can at best be maxlayer which is the max in oldDists
+        if (dist[current] >= maxLayer - 1)
             break;
 
         // only update distances that get smaller because of the new edge
         for (auto neighbor : m_adj[current])
             if (1 + dist[current] < dist[neighbor])
             {
+                oldEntries.emplace_back(neighbor, dist[neighbor]); // save old values
                 dist[neighbor] = 1 + dist[current];
-                queue[q_end++] = neighbor; // queue.push_back(v);
+                queue[q_end++] = neighbor; // queue.push_back(neighbor);
             }
     }
-    return dist;
+
+    // revert back to old dists
+    auto sumImprovement = 0;
+    for(auto & entry : oldEntries)
+    {
+        assert(dist[entry.first] < entry.second);
+        sumImprovement += entry.second - dist[ entry.first];
+        dist[entry.first] = entry.second;
+    }
+    oldEntries.clear();
+
+    return sumImprovement;
 }
 
 Graph Graph::createCircle(int size) {

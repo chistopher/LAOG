@@ -54,13 +54,16 @@ int Network::bestResponseTwoNeigh(int agent) {
     // bfs up to layer 3
     auto dist = m_graph.distances(agent, 3);
 
-    int bestResponse = -1;
-    double bestGain = 0;
+    auto bestResponse = -1;
+    auto bestGain = 0.0;
+
     for(int i = 0; i<n; ++i)
     {
+        // only dist 2 vertices are relevant
         if(dist[i] != 2) continue;
-        int distGain = 0;
-        double edgeCost = (this->*m_edgeCost)(m_graph.deg(i) + 1);
+        // dist improvement if edge (agent, i) is present
+        auto distGain = 0; // TODO try std::count_if
+        auto edgeCost = (this->*m_edgeCost)(m_graph.deg(i) + 1);
         for(auto neighbor : m_graph.neighbors(i))
             if(dist[neighbor] == 3) ++distGain;
         auto realGain = distGain - edgeCost;
@@ -77,36 +80,23 @@ int Network::bestResponseTwoNeigh(int agent) {
 int Network::bestResponseSumDist(int agent) {
 
     const auto dist = m_graph.distances(agent); // should not be -1 coz connected
-    auto maxDist = 0;
-    // dist cost
-    auto currentDistCost = 0;
-    for (auto each : dist) {
-        currentDistCost += each;
-        maxDist = std::max(maxDist, each);
-    }
-    // edge cost
-    auto currentEdgeCost = 0.0;
-    for(auto neigh : m_graph.neighbors(agent))
-        currentEdgeCost += (this->*m_edgeCost)(m_graph.deg(neigh));
+    auto maxDist = *std::max_element(dist.begin(), dist.end());
 
     auto bestResponse = -1;
-    auto bestCost = currentDistCost + currentEdgeCost;
+    auto bestGain = 0.0;
 
     for(int i = 0; i < (int)m_graph.n(); ++i)
     {
         // only dist 2 vertices are relevant
         if(dist[i] != 2) continue;
-        // dist cost if edge (agent, i) is present
-        auto newDists = m_graph.distancesWithEdge(agent, i, maxDist, dist);
-        auto newDistCost = std::accumulate(newDists.begin(), newDists.end(), 0);
-        // edge cost (only add cost of new edge)
-        auto newEdgeCost = currentEdgeCost + (this->*m_edgeCost)(m_graph.deg(i)+1);
-        auto newCost = newDistCost + newEdgeCost;
-        if(newDistCost + newEdgeCost < bestCost)
-        {
+        // dist improvement if edge (agent, i) is present
+        auto distGain = m_graph.distImprovementOfEdge(agent, i, maxDist, dist);
+        auto edgeCost = (this->*m_edgeCost)(m_graph.deg(i)+1);
+        auto realGain = distGain - edgeCost;
+        if(realGain > bestGain){
             if (m_greedy) return i;
             bestResponse = i;
-            bestCost = newCost;
+            bestGain = realGain;
         }
 
     }

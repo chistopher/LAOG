@@ -17,7 +17,7 @@ int main(int argc, char* argv[]){
     const int v = 13;
 
     auto realDist = g.distances(v);
-    auto checkSum = accumulate(realDist.begin(), realDist.end(), 0);
+    auto sumDist = accumulate(realDist.begin(), realDist.end(), 0);
 
     // test maxLayer
     auto distTo5 = g.distances(v, 5);
@@ -31,10 +31,10 @@ int main(int argc, char* argv[]){
 
     // test distWidthEdge
     auto start1 = chrono::high_resolution_clock::now();
-    auto distAddEdge = g.distancesWithEdge(v, 67, 10000, realDist);
+    auto improvement = g.distancesWithEdge(v, 67, 10000, realDist);
     auto dists2 = g.distances(v);
     auto end1 = chrono::high_resolution_clock::now();
-    assert(accumulate(distAddEdge.begin(), distAddEdge.end(), 0) != checkSum); // secures that v was not connected to 67
+    assert(improvement > 0); // secures that v was not connected to 67
 
     for(unsigned int i=0; i<g.n(); ++i) // check that nothing has changed
         assert(dists2[i] == realDist[i]);
@@ -44,10 +44,8 @@ int main(int argc, char* argv[]){
     auto newDists = g.distances(v);
     auto end2 = chrono::high_resolution_clock::now();
 
-
-    for(unsigned int i=0; i<g.n(); ++i)
-        assert(distAddEdge[i] == newDists[i]);
-
+    auto sumDistWithEdge = accumulate(newDists.begin(), newDists.end(), 0);
+    assert(sumDistWithEdge == sumDist - improvement);
 
     cout << (end1 - start1).count() << endl;
     cout << (end2 - start2).count() << endl;
