@@ -26,4 +26,7 @@ if __name__ == '__main__':
     print('xmin                 ', fit.xmin)
     print('%nodes under xmin    ', 100 * sum(i < fit.xmin for i in degrees) / float(len(g)))
     print('KS distance          ', fit.power_law.KS())
-    print('power law likelihood ', fit.distribution_compare('power_law', 'exponential'))
+    print('compare with expnential distribution ... ')
+    comp = fit.distribution_compare('power_law', 'exponential')
+    print('loglikelihood ratio  ', comp[0])
+    print('p-value              ', comp[1])
