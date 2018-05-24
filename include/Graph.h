@@ -16,6 +16,8 @@ public:
     const std::vector<int>& neighbors(int v) const;
 
     void connect(int u, int v);
+    void insertVertex();
+    bool isConnected(int u, int v) const;
 
     // returns distances of each node to v or -1 if not reachable
     std::vector<int> distances(int v, int maxLayer = -1) const;

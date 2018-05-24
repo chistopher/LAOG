@@ -12,6 +12,16 @@ from sys import argv
 from networkx.drawing.nx_agraph import read_dot
 
 
+def plot(data, ylabel, name):
+    plt.plot(range(len(data)),data,'k.')
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.ylabel('ylabel')
+    plt.xlabel('Degree')
+    plt.savefig(name)
+    plt.clf()
+
+
 if __name__ == '__main__':
     if len(argv) < 2 or not os.path.isfile(argv[1]):
         print('Error: first argument is no file')
@@ -21,10 +31,7 @@ if __name__ == '__main__':
     dist = np.bincount(degrees)
     cdf = np.cumsum(dist)/np.sum(dist)
     ccdf = 1-cdf
-    plt.plot(range(len(ccdf)),ccdf,'k.')
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.ylabel('CCDF')
-    plt.xlabel('Degree')
-    plt.savefig(argv[1][:-4] + '_ccdf.pdf')
-    plt.clf()
+
+    # plot(dist, 'frequency', argv[1][:-4] + '_dist.pdf')
+    # plot(cdf, 'CDF', argv[1][:-4] + '_cdf.pdf')
+    plot(ccdf, 'CCDF', argv[1][:-4] + '_ccdf.pdf')

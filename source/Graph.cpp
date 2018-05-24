@@ -1,6 +1,7 @@
 
 #include <Graph.h>
 
+#include <algorithm>
 #include <cassert>
 #include <random>
 #include <list>
@@ -40,6 +41,15 @@ void Graph::connect(int u, int v) {
     m_adj[u].push_back(v);
     m_adj[v].push_back(u);
     ++m_m;
+}
+
+void Graph::insertVertex() {
+    m_n++;
+    m_adj.emplace_back();
+}
+
+bool Graph::isConnected(int u, int v) const {
+    return std::find(m_adj[u].begin(), m_adj[u].end(), v) != m_adj[u].end();
 }
 
 std::vector<int> Graph::distances(int v, int maxLayer) const {
@@ -180,4 +190,3 @@ std::ostream &operator<<(std::ostream &os, const Graph &graph) {
     os << '}' << std::endl;
     return os;
 }
-

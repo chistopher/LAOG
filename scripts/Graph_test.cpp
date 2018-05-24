@@ -31,7 +31,7 @@ int main(int argc, char* argv[]){
 
     // test distWidthEdge
     auto start1 = chrono::high_resolution_clock::now();
-    auto improvement = g.distancesWithEdge(v, 67, 10000, realDist);
+    auto improvement = g.distImprovementOfEdge(v, 67, 10000, realDist);
     auto dists2 = g.distances(v);
     auto end1 = chrono::high_resolution_clock::now();
     assert(improvement > 0); // secures that v was not connected to 67
