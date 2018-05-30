@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <fstream>
 #include <utility>
+#include <map>
+#include <cassert>
 
 #include <Graph.h>
 #include <Network.h>
@@ -33,7 +35,9 @@ int main(int argc, char* argv[]){
 
     auto graph = Graph(1);
 
+    // not sure if set or multiset -- multiset benefits potential edges with multiple common neighbors
     auto potentialEdges = vector<pair<int,int>>();
+    auto isPotential = map<pair<int,int>, bool>();
 
     while(graph.n() < max_n){
 
@@ -47,8 +51,13 @@ int main(int argc, char* argv[]){
             auto from = graph.n();
             auto to = rand(graph.n());
             graph.insertVertex();
-            for(auto neigh : graph.neighbors(to))
-                potentialEdges.emplace_back(from, neigh);
+            for(auto neigh : graph.neighbors(to)){
+                pair<int,int> edge = {neigh, from};
+                if(isPotential.find(edge) == isPotential.end()){
+                    potentialEdges.emplace_back(edge);
+                    isPotential[edge] = true;
+                }
+            }
             graph.connect(from, to);
         }
         else {
@@ -68,17 +77,25 @@ int main(int argc, char* argv[]){
                 potentialEdges[edge_index].second = potentialEdges.back().second;
                 potentialEdges.resize(potentialEdges.size()-1);
 
-                if(graph.isConnected(from, to))
-                    continue;
+                //if(graph.isConnected(from, to))
+                    //continue;
 
                 // create new potential edges
                 for(auto neigh : graph.neighbors(from)){
-                    if(!graph.isConnected(to, neigh))
-                        potentialEdges.emplace_back(to, neigh);
+                    pair<int,int> edge = {to,neigh};
+                    if(edge.first > edge.second) swap(edge.first, edge.second);
+                    if(isPotential.find(edge) == isPotential.end() && !graph.isConnected(to, neigh)){
+                        potentialEdges.push_back(edge);
+                        isPotential[edge] = true;
+                    }
                 }
                 for(auto neigh : graph.neighbors(to)){
-                    if(!graph.isConnected(from, neigh))
-                        potentialEdges.emplace_back(from, neigh);
+                    pair<int,int> edge = {from,neigh};
+                    if(edge.first > edge.second) swap(edge.first, edge.second);
+                    if(isPotential.find(edge) == isPotential.end() && !graph.isConnected(from, neigh)){
+                        potentialEdges.push_back(edge);
+                        isPotential[edge] = true;
+                  }
                 }
 
                 graph.connect(from, to);
