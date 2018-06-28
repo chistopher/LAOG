@@ -33,6 +33,6 @@ if __name__ == '__main__':
     cdf = np.cumsum(dist)/np.sum(dist)
     ccdf = 1-cdf
 
-    plot(dist, 'frequency', argv[1][:-4] + '_dist.pdf')
-    plot(cdf, 'CDF', argv[1][:-4] + '_cdf.pdf')
-    plot(ccdf, 'CCDF', argv[1][:-4] + '_ccdf.pdf')
+    #plot(dist, 'frequency', argv[1][:-4] + '_dist.pdf')
+    #plot(cdf, 'CDF', argv[1][:-4] + '_cdf.pdf')
+    plot(ccdf, 'CCDF', argv[1][:-4] + '_ccdf.png')

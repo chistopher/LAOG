@@ -70,9 +70,9 @@ std::vector<int> Graph::distances(int v, int maxLayer) const {
     while(q_start < q_end) // !queue.empty()
     {
         auto current = queue[q_start++]; // queue.pop_front()
-        
+
         // skip last layer since it does not change any distances
-        if (dist[current] >= maxLayer) 
+        if (dist[current] >= maxLayer)
             break;
 
         // queue all neighbors
