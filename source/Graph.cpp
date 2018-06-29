@@ -5,6 +5,7 @@
 #include <cassert>
 #include <random>
 #include <list>
+#include <set>
 
 
 Graph::Graph(int size) {
@@ -134,6 +135,45 @@ int Graph::distImprovementOfEdge(int v, int additionalEdge, int maxLayer, const 
 
     return sumImprovement;
 }
+
+std::vector<int> Graph::distImprovementOfTwoNeighs(int v) const {
+
+    auto dist = std::vector<int>(m_n, -1);
+    std::vector<int> queue(m_n);
+    auto q_start = 0;
+    auto q_end = 0;
+
+    queue[q_end++] = v; // queue.push_back(v);
+    dist[v] = 0;
+
+    std::vector<std::set<int>> twoNeighsOnShortestPath(m_n);
+    while(q_start < q_end) // !queue.empty()
+    {
+        auto current = queue[q_start++]; // queue.pop_front()
+
+        if(dist[current] == 2)
+            twoNeighsOnShortestPath[current].insert(current);
+
+        // queue all neighbors
+        for (auto neighbor : m_adj[current]) {
+            if (dist[neighbor] == -1) {
+                dist[neighbor] = 1 + dist[current];
+                queue[q_end++] = neighbor; // queue.push_back(v);
+            }
+            if(dist[neighbor] == dist[current] + 1 && dist[current] >= 2)
+                for(auto each : twoNeighsOnShortestPath[current])
+                    twoNeighsOnShortestPath[neighbor].insert(each);
+        }
+    }
+
+    std::vector<int> improvement(m_n, 0);
+    for(auto& each : twoNeighsOnShortestPath)
+        for(auto twoNeigh : each)
+            improvement[twoNeigh]++;
+
+    return improvement;
+}
+
 
 Graph Graph::createCircle(int size) {
     auto circle = createPath(size);

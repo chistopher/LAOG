@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include <map>
 
 class Graph
 {
@@ -24,6 +25,10 @@ public:
 
     // compute distance improvement if the edge (v,additionalEdge) is inserted; maxLayer should be max of oldDists
     int distImprovementOfEdge(int v, int additionalEdge, int maxLayer, const std::vector<int> & oldDists) const;
+
+    // returns vector with distImprovementOfEdge for all edges from v to every node in distance 2
+    // nodes not in distance 2 have 0 improvement
+    std::vector<int> distImprovementOfTwoNeighs(int v) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Graph& graph);
 

@@ -1,53 +1,77 @@
 
 #include <iostream>
-#include <fstream>
 #include <cassert>
-#include <chrono>
+#include <algorithm>
+#include <numeric>
 
 #include <Graph.h>
 #include <Network.h>
-#include <numeric>
+
 
 using namespace std;
 
 
-int main(int argc, char* argv[]){
-
+void testMaxLayer(){
     auto g = Graph::createRandomTree(100);
-    const int v = 13;
+    const auto v = 23;
 
-    auto realDist = g.distances(v);
-    auto sumDist = accumulate(realDist.begin(), realDist.end(), 0);
-
-    // test maxLayer
+    auto dist = g.distances(v);
     auto distTo5 = g.distances(v, 5);
     for(unsigned int i=0; i<g.n(); ++i)
-    {
-        if(realDist[i] > 5)
+        if(dist[i] > 5)
             assert(distTo5[i] == -1);
         else
-            assert(distTo5[i] == realDist[i]);
+            assert(distTo5[i] == dist[i]);
+}
+
+void testDistWithEdge(){
+    auto g = Graph::createRandomTree(100);
+    const auto v = 23;
+    const auto u = 67;
+
+    // assert v and u not connected (CAUTION! CAN RANDOMLY FAIL)
+    const auto & vNeighbors = g.neighbors(v);
+    assert(find(vNeighbors.begin(), vNeighbors.end(), u) == vNeighbors.end());
+
+    auto dist = g.distances(v);
+    auto improvement = g.distImprovementOfEdge(v, u, 10000, dist);
+    auto dist2 = g.distances(v);
+
+    // assert constness of g.distImprovement
+    for(unsigned int i=0; i<g.n(); ++i)
+        assert(dist[i] == dist2[i]);
+
+    // check correctness
+    auto oldDistSum = accumulate(dist.begin(), dist.end(), 0);
+    g.connect(v, u);
+    auto newDist = g.distances(v);
+    auto newDistSum = accumulate(newDist.begin(), newDist.end(), 0);
+    assert(newDistSum == oldDistSum - improvement);
+}
+
+void testDistImprovementOfTwoNeighs(){
+    auto g = Graph::createCircle(100);
+    const auto v = 1;
+
+    auto dist = g.distances(v);
+    auto distImp = g.distImprovementOfTwoNeighs(v);
+    for(unsigned int i=0; i<g.n(); ++i){
+        if(dist[i] != 2)
+            assert(distImp[i] == 0);
+        else {
+            auto imp1 = g.distImprovementOfEdge(v, i, g.n(), dist);
+            auto imp2 = distImp[i];
+            assert(imp1 == imp2); // assert correct dist improvement
+        }
     }
+}
 
-    // test distWidthEdge
-    auto start1 = chrono::high_resolution_clock::now();
-    auto improvement = g.distImprovementOfEdge(v, 67, 10000, realDist);
-    auto dists2 = g.distances(v);
-    auto end1 = chrono::high_resolution_clock::now();
-    assert(improvement > 0); // secures that v was not connected to 67
 
-    for(unsigned int i=0; i<g.n(); ++i) // check that nothing has changed
-        assert(dists2[i] == realDist[i]);
+int main(int argc, char* argv[]){
 
-    auto start2 = chrono::high_resolution_clock::now();
-    g.connect(v, 67);
-    auto newDists = g.distances(v);
-    auto end2 = chrono::high_resolution_clock::now();
+    testMaxLayer();
+    testDistWithEdge();
+    testDistImprovementOfTwoNeighs();
 
-    auto sumDistWithEdge = accumulate(newDists.begin(), newDists.end(), 0);
-    assert(sumDistWithEdge == sumDist - improvement);
-
-    cout << (end1 - start1).count() << endl;
-    cout << (end2 - start2).count() << endl;
     return 0;
 }
