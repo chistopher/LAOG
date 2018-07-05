@@ -5,14 +5,16 @@
 #include <numeric>
 
 #include <Graph.h>
-#include <Network.h>
 
 
 using namespace std;
 
+// change to test other starting graphs
+const auto seed = 1337;
+
 
 void testMaxLayer(){
-    auto g = Graph::createRandomTree(100);
+    auto g = Graph::createRandomTree(100, seed);
     const auto v = 23;
 
     auto dist = g.distances(v);
@@ -25,7 +27,7 @@ void testMaxLayer(){
 }
 
 void testDistWithEdge(){
-    auto g = Graph::createRandomTree(100);
+    auto g = Graph::createRandomTree(100, seed);
     const auto v = 23;
     const auto u = 67;
 
@@ -50,7 +52,7 @@ void testDistWithEdge(){
 }
 
 void testDistImprovementOfTwoNeighs(){
-    auto g = Graph::createCircle(100);
+    auto g = Graph::createRandomTree(100, 1337);
     const auto v = 1;
 
     auto dist = g.distances(v);

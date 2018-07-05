@@ -19,10 +19,12 @@ map<string, string> parseArgs(int argc, char** argv){
         std::string arg  = argv[i]+1; // +1 to skip the -
         std::string next = (i+1 < argc ? argv[i+1] : "");
 
-        // advance one additional position if next is used
-        if(next.length() == 0 || next.front() == '-'){
+        // if next is empty or a new param means current is treated as bool flag
+        // a new param will start with '-' and end with no number
+        if(next.length() == 0 || (next.front() == '-' && !('0' <= next.back() && next.back() <= '9'))){
             params[std::move(arg)] = "1";
         } else {
+            // advance one additional position if next is used
             params[std::move(arg)] = std::move(next);
             ++i;
         }
@@ -42,7 +44,7 @@ int main(int argc, char* argv[]){
              << "\t\t[-start circle|tree|path] // starting graph configuration  default circle\n"
              << "\t\t[-greedy 0|1]             // best response or greedy       default 0\n"
              << "\t\t[-random 0|1]             // enables random scheduling     default 1\n"
-             << "\t\t[-seed anInt]             // seed for random scheduling    default 1337\n"
+             << "\t\t[-seed anInt]             // seed for scheduling and tree  default 1337\n"
              << "\t\t[-gexf 0|1]               // save intermediates as gexf    default 0\n"
              << "\t\t[-file aString]           // file name for output graph    default a good one\n";
         return 0;
@@ -51,9 +53,10 @@ int main(int argc, char* argv[]){
     // read params
     auto params = parseArgs(argc, argv);
     auto n = !params["n"].empty() ? stoi(params["n"]) : 1000;
+    auto seed = !params["seed"].empty() ? stoi(params["seed"]) : 1337;
     auto start = !params["start"].empty() ? params["start"] : "circle";
     auto graph = (start == "path") ? Graph::createPath(n) :
-                 ((start == "tree") ? Graph::createRandomTree(n) :
+                 ((start == "tree") ? Graph::createRandomTree(n, seed) :
                  Graph::createCircle(n));
     auto dist = params["dist"] == "dist" ? &Network::bestResponseSumDist : &Network::bestResponseTwoNeigh;
     auto cost = params["cost"] == "poly" ? &Network::polyCost : &Network::linearCost;
@@ -61,7 +64,6 @@ int main(int argc, char* argv[]){
     auto c = !params["c"].empty() ? stod(params["c"]) : 0.0;
     auto greedy = params["greedy"] == "1";
     auto random = params["random"] != "0";
-    auto seed = !params["seed"].empty() ? stoi(params["seed"]) : 1337;
     auto save_intermediate = params["gexf"] == "1";
     auto file = params["file"];
 
@@ -77,7 +79,7 @@ int main(int argc, char* argv[]){
             network.save_gexf(file);
         clog << "starting round " << network.m_round + 1 << endl;
     } while (!network.performRound(random));
-    clog << "network converged in " << network.m_round - 1 << " round(s)" << endl;
+    clog << "network converged in " << network.m_round << " round(s)" << endl;
 
     if(!save_intermediate)
         network.save_dot(file);

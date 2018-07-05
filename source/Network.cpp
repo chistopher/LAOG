@@ -44,11 +44,12 @@ bool Network::performRound(bool random) {
         for(auto each : order)
             activateAgent(each);
     }
-    ++m_round;
+    m_round += !m_converged;
+    m_random |= random;
     return m_converged;
 }
 
-int Network::bestResponseTwoNeigh(int agent) {
+int Network::bestResponseTwoNeigh(int agent) const {
     const int n = m_graph.n();
 
     // bfs up to layer 3
@@ -77,7 +78,7 @@ int Network::bestResponseTwoNeigh(int agent) {
     return bestResponse;
 }
 
-int Network::bestResponseSumDist(int agent) {
+int Network::bestResponseSumDist(int agent) const {
 
     const auto dist = m_graph.distances(agent); // should not be -1 coz connected
     auto maxDist = *std::max_element(dist.begin(), dist.end());
@@ -103,15 +104,16 @@ int Network::bestResponseSumDist(int agent) {
     return bestResponse;
 }
 
-double Network::linearCost(int deg) {
+double Network::linearCost(int deg) const {
     return std::max(0.0, m_alpha * (deg-1) + m_c);
 }
 
-double Network::polyCost(int deg) {
+double Network::polyCost(int deg) const {
     return std::max(0.0, std::pow(deg-1, m_alpha) + m_c);
 }
 
 void Network::seed(unsigned int seed) {
+    m_seed = seed; // only to store value for later lookup
     m_rand.seed(seed);
 }
 
@@ -131,6 +133,23 @@ std::string Network::filename() const{
 void Network::save_dot(std::string name) const{
     if(name.empty()) name = filename();
     std::ofstream file(name + ".dot");
+    // store meta info as comments
+    file << "/* META INFO:" << '\n';
+    file << "round      " << m_round << '\n';
+    file << "converged  " << m_converged << '\n';
+    file << "seed       " << m_seed << '\n';
+    file << "n          " << graph().n() << '\n';
+    file << "m          " << graph().m() << '\n';
+    file << "start      " << m_startingName << '\n';
+    file << "dist       " << ((m_bestResponse == &Network::bestResponseSumDist) ? "dist" : "two") << '\n';
+    file << "cost       " << (m_edgeCost == &Network::linearCost ? "linear" : "poly") << '\n';
+    file << "a          " << m_alpha << '\n';
+    file << "c          " << m_c << '\n';
+    file << "greedy     " << m_greedy << '\n';
+    file << "random     " << m_random << '\n';
+    file << "*/" << "\n\n";
+
+    // write the graph in dot format
     file << graph();
 }
 

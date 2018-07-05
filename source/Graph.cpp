@@ -189,14 +189,14 @@ Graph Graph::createPath(int size) {
 }
 
 // Wilson's Algorithm for uniform random spanning trees
-Graph Graph::createRandomTree(int size) {
+Graph Graph::createRandomTree(int size, int seed) {
 
     // Create two partitions, S and T. Initially store all nodes in S.
     auto tree = Graph(size);
     auto T = std::vector<bool>(size, false);
     auto S = size;
 
-    auto gen = std::mt19937(1337);
+    auto gen = std::mt19937(seed);
     auto dist = std::uniform_int_distribution<>(0, size-1);
 
     // Pick a random node, and mark it as visited and the current node.

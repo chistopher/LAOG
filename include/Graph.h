@@ -35,7 +35,7 @@ public:
     // special constructors
     static Graph createCircle(int size);
     static Graph createPath(int size);
-    static Graph createRandomTree(int size);
+    static Graph createRandomTree(int size, int seed = 1337);
 
 protected:
     std::vector<std::vector<int>> m_adj; // adjacency list

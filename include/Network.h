@@ -8,8 +8,8 @@
 // representation of our add only game
 class Network{
 public:
-    using BestResponseFunction = int(Network::*)(int);
-    using EdgeCostFunction = double(Network::*)(int);
+    using BestResponseFunction = int(Network::*)(int) const;
+    using EdgeCostFunction = double(Network::*)(int) const;
 
     Network(Graph&& startingGraph,
             BestResponseFunction bestResponse = &Network::bestResponseTwoNeigh,
@@ -23,15 +23,19 @@ public:
     // returns if converged
     bool performRound(bool random);
 
-    // different ways to compute best response
-    int bestResponseTwoNeigh(int agent); // dist cost is n - 2-neighborhood
-    int bestResponseSumDist(int agent); // dist cost is sum of distances
+    // pass a pointer to this member to configure the network in constructor
+    // returns -1 if agent has no improving move
+    int bestResponseTwoNeigh(int agent) const; // dist cost is n - 2-neighborhood
+    int bestResponseSumDist(int agent) const; // dist cost is sum of distances
 
-    double linearCost(int deg);
-    double polyCost(int deg);
+    // pass a pointer to this member to configure the network in constructor
+    double linearCost(int deg) const;
+    double polyCost(int deg) const;
 
+    // seeds the mt19937 used to perform round in random order
     void seed(unsigned int seed);
 
+    // filename with most meta info; used if no name given in save_*
     std::string filename() const;
     void save_dot(std::string name = "") const;
     void save_gexf(std::string name = "") const;
@@ -43,6 +47,10 @@ protected:
     Graph m_graph;
     std::string m_startingName;
     std::mt19937 m_rand;
+
+    // things to remember
+    int m_seed;
+    bool m_random;
 
 public:
     unsigned int m_round = 0;
