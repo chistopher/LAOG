@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo seed $((CW_N + SLURM_PROCID))
+echo "starting computation for n=${CW_N} run=${SLURM_PROCID} on ${SLURMD_NODENAME}"
+date
+./laogen -n ${CW_N} -dist ${CW_DIST} -cost ${CW_COST} -a ${CW_A} -c ${CW_C} -start ${CW_START} -seed $((CW_N + SLURM_PROCID)) -file "${CW_DIR}/${CW_N}_${SLURM_PROCID}"
+date
