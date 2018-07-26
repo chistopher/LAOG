@@ -25,7 +25,7 @@ if __name__ == '__main__':
     # print('diameter             ', nx.diameter(g))
     print('average clustering   ', nx.average_clustering(g))
     numpy.seterr(divide='ignore', invalid='ignore')
-    fit = powerlaw.Fit(degrees)
+    fit = powerlaw.Fit(degrees, discrete=True, verbose=False)
     print('power law exponent   ', fit.alpha)
     print('xmin                 ', fit.xmin)
     print('%nodes under xmin    ', 100 * sum(i < fit.xmin for i in degrees) / float(len(g)))

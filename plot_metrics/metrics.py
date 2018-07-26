@@ -30,10 +30,14 @@ def metrics(file, use_cache=True):
     metrics['rounds'] = int(metalines[1].split()[-1])
     metrics['max_degree'] = max(degrees)
     metrics['avg_degree'] = mean(degrees)
+    metrics['min_degree'] = min(degrees)
     metrics['local_clustering'] = mean(local_clustering(g).get_array())
     metrics['global_clustering'] = global_clustering(g)[0]
     metrics['pseudo_diameter'] = int(pseudo_diameter(g)[0])
-    metrics['exponent'] = powerlaw.Fit(degrees, verbose=False).alpha
+    fit = powerlaw.Fit(degrees, discrete=True, verbose=False)
+    metrics['exponent'] = fit.alpha
+    metrics['KS'] = fit.power_law.KS()
+    metrics['x_min'] = fit.xmin
 
     with open(cache, "w") as fp:
         json.dump(metrics, fp)
