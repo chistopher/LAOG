@@ -9,7 +9,7 @@ import os.path
 
 def plot(all_data, key_to_plot, directory=".", eng_fmt = False):
     list_of_n = sorted(all_data.keys())
-    samples = len(all_data[list_of_n[0]])
+    samples =  len(next(iter(all_data.values())))
     data = [ [all_data[n][i][key_to_plot] for i in range(samples)] for n in list_of_n]
     data_mean = list(map(mean, data))
     data_min = list(map(min, data))

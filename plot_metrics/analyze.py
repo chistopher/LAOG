@@ -2,17 +2,18 @@
 import json
 import os
 
-from metrics import metrics
-
-
 def analyze(directory, use_cache=True):
     # use cache or recompute
     cache = os.path.join(directory, "metrics.json")
     if use_cache and os.path.isfile(cache):
         print('using cached metrics for', directory)
         with open(cache, "r") as fp:
-            return json.load(fp)
+            # load json and convert keys back to int 
+            return {int(k): v for k,v in json.load(fp).items()}
     print('computing metrics for', directory)
+
+    # import here coz it takes consierable amount of time (>1sec)
+    from metrics import metrics
 
     # search dot files
     dots_by_n = {}
