@@ -230,3 +230,76 @@ std::ostream &operator<<(std::ostream &os, const Graph &graph) {
     os << '}' << std::endl;
     return os;
 }
+
+
+
+// alternative stuff from here on
+
+Graph Graph::shortestPathDAG(int v) const {
+    auto DAG = Graph(m_n);
+    fillShortestPathDAG(DAG, v);
+    return DAG;
+}
+
+Graph& Graph::shortestPathDAGWithStaticMemory(int v) const {
+    static auto DAG = Graph(m_n);
+    DAG.m_adj.resize(m_n);
+    for(auto& each : DAG.m_adj)
+        each.clear();
+    DAG.m_n = m_n;
+    fillShortestPathDAG(DAG, v);
+    return DAG;
+}
+
+void Graph::fillShortestPathDAG(Graph &DAG, int v) const {
+    // BFS to compute DAG
+    const auto infinity = 2*m_n; // use 2*m_n as infinity
+    auto dist = std::vector<int>(m_n, infinity);
+    std::vector<int> queue(m_n);
+    auto q_start = 0;
+    auto q_end = 0;
+    queue[q_end++] = v; // queue.push_back(v);
+    dist[v] = 0;
+    while(q_start < q_end) { // !queue.empty()
+        auto current = queue[q_start++]; // queue.pop_front()
+        for (auto neighbor : m_adj[current]) {
+            if (dist[neighbor] == infinity) {
+                // found first shortest path to neighbor
+                dist[neighbor] = 1 + dist[current];
+                queue[q_end++] = neighbor; // queue.push_back(v);
+                DAG.m_adj[current].push_back(neighbor);
+            } else if(dist[neighbor] == 1 + dist[current]){
+                // found additional shortest path to neighbor
+                DAG.m_adj[current].push_back(neighbor);
+            }
+        }
+    }
+}
+
+int Graph::reachable(int v) const {
+    std::vector<int> queue(m_n);
+    std::vector<char> visited(m_n, false);
+    auto q_start = 0;
+    auto q_end = 0;
+    queue[q_end++] = v; // queue.push_back(v);
+    visited[v] = true;
+    while(q_start < q_end) { // !queue.empty()
+        auto current = queue[q_start++]; // queue.pop_front()
+        for (auto neighbor : m_adj[current]) {
+            if (!visited[neighbor]) {
+                visited[neighbor] = true;
+                queue[q_end++] = neighbor; // queue.push_back(v);
+            }
+        }
+    }
+    return q_end; // number of nodes that were in queue
+}
+
+int Graph::sizeOfTwoNeighborhood(int v) const {
+    auto dists = distances(v, 2);
+    auto result = 0;
+    for(auto dist : dists)
+        if(dist >= 0 && dist <= 2)
+            ++result;
+    return result;
+}

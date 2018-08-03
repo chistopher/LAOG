@@ -23,10 +23,12 @@ set(SOURCE_FILES
 
 set(EXECUTABLE_FILES
         scripts/testing.cpp
-        scripts/Graph_test.cpp
+        scripts/test_Graph.cpp
+        scripts/test_Network.cpp
         scripts/sumDistBenchmark.cpp
         scripts/laogen.cpp
         scripts/link_triple.cpp
+        scripts/benchmark.cpp
         )
 
 

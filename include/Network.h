@@ -40,6 +40,20 @@ public:
     void save_dot(std::string name = "") const;
     void save_gexf(std::string name = "") const;
 
+    // alternative bestResponse implementations
+protected:
+    template<typename T> // takes lambda as move evaluator
+    int find_BR(const std::vector<int> &old_dists, T getDistGain) const;
+public:
+    int neighNaive(int agent) const;
+    int neighGood(int agent) const;
+    int distNaive(int agent) const;
+    int distImproOfEdge(int agent) const;
+    int distImproOfEdgeMaxLayer(int agent) const;
+    int distWithSets(int agent) const;
+    int distDAGandBFS(int agent) const;
+    int distDAGandBFSStatic(int agent) const;
+
 protected:
     BestResponseFunction m_bestResponse;
     EdgeCostFunction m_edgeCost;

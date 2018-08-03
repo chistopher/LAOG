@@ -37,6 +37,13 @@ public:
     static Graph createPath(int size);
     static Graph createRandomTree(int size, int seed = 1337);
 
+    // functions for alternative BR versions
+    Graph shortestPathDAG(int v) const;
+    Graph& shortestPathDAGWithStaticMemory(int v) const;
+    void fillShortestPathDAG(Graph& DAG, int v) const; // helper
+    int reachable(int v) const;
+    int sizeOfTwoNeighborhood(int v) const;
+
 protected:
     std::vector<std::vector<int>> m_adj; // adjacency list
     unsigned int m_n;

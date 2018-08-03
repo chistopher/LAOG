@@ -8,6 +8,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <cassert>
 
 
 Network::Network(Graph&& startingGraph, BestResponseFunction bestResponse, EdgeCostFunction edgeCost, std::string startingName)
@@ -172,4 +173,101 @@ void Network::save_gexf(std::string name) const{
     file << "</graph>\n";
     file << "</gexf>\n";
 
+}
+
+
+// alternative functions helper
+template<typename T>
+int Network::find_BR(const std::vector<int> &old_dists, T getDistGain) const {
+    auto bestResponse = -1;
+    auto bestGain = 0.0;
+    for(auto i = 0; i < (int)m_graph.n(); ++i) {
+        if(old_dists[i] != 2) continue;
+
+        // evaluate move
+        auto distGain = getDistGain(i);
+
+        auto edgeCost = (this->*m_edgeCost)(m_graph.deg(i)+1);
+        auto realGain = distGain - edgeCost;
+        if(realGain > bestGain){
+            bestResponse = i;
+            bestGain = realGain;
+        }
+    }
+    return bestResponse;
+}
+
+int Network::neighNaive(int agent) const {
+    const auto old_dists = m_graph.distances(agent, 2);
+    const auto old_neigh = m_graph.sizeOfTwoNeighborhood(agent);
+    auto& agentsNeighbors = const_cast<std::vector<int>&>(m_graph.neighbors(agent));
+    auto distGain = [&](int i){
+        agentsNeighbors.push_back(i);
+        auto new_neigh = m_graph.sizeOfTwoNeighborhood(agent);
+        auto gain = new_neigh - old_neigh;
+        agentsNeighbors.pop_back();
+        return gain;
+    };
+    return find_BR(old_dists, distGain);
+}
+
+int Network::neighGood(int agent) const {
+    // use current implementation
+    return bestResponseTwoNeigh(agent);
+}
+
+int Network::distNaive(int agent) const {
+    const auto old_dists = m_graph.distances(agent);
+    const auto oldSum = std::accumulate(old_dists.begin(), old_dists.end(), 0);
+    auto& agentsNeighbors = const_cast<std::vector<int>&>(m_graph.neighbors(agent));
+    auto distGain = [&](int i){
+        agentsNeighbors.push_back(i);
+        auto new_dists = m_graph.distances(agent);
+        auto gain = oldSum - std::accumulate(new_dists.begin(), new_dists.end(), 0);
+        agentsNeighbors.pop_back();
+        return gain;
+    };
+    return find_BR(old_dists, distGain);
+}
+
+int Network::distImproOfEdge(int agent) const {
+    const auto old_dists = m_graph.distances(agent);
+    const auto maxDist = graph().n()+5;
+    auto distGain = [&](int i){
+        return m_graph.distImprovementOfEdge(agent, i, maxDist, old_dists);
+    };
+    return find_BR(old_dists, distGain);
+}
+
+int Network::distImproOfEdgeMaxLayer(int agent) const {
+    // use current implementation
+    return bestResponseSumDist(agent);
+}
+
+int Network::distWithSets(int agent) const {
+
+    const auto old_dists = m_graph.distances(agent, 2);
+    auto impros = m_graph.distImprovementOfTwoNeighs(agent);
+    auto distGain = [&impros](int i){
+        return impros[i];
+    };
+    return find_BR(old_dists, distGain);
+}
+
+int Network::distDAGandBFS(int agent) const {
+    auto DAG = m_graph.shortestPathDAG(agent);
+    auto old_dists = m_graph.distances(agent, 2);
+    auto distGain = [&DAG](int i){
+        return DAG.reachable(i);
+    };
+    return find_BR(old_dists, distGain);
+}
+
+int Network::distDAGandBFSStatic(int agent) const {
+    auto& DAG = m_graph.shortestPathDAGWithStaticMemory(agent);
+    auto old_dists = m_graph.distances(agent, 2);
+    auto distGain = [&DAG](int i){
+        return DAG.reachable(i);
+    };
+    return find_BR(old_dists, distGain);
 }
