@@ -10,12 +10,14 @@ using BestResponseFunction = int(Network::*)(int) const;
 
 // change to test other starting graphs
 const auto seed = 1337;
-const auto n = 500;
+const auto n = 100;
 
 
 void assert(bool cond){
-    if(!cond) cout << "assertion failed" << endl;
-    exit(1);
+    if(!cond){
+        cout << "assertion failed" << endl;
+        exit(1);
+    }
 }
 
 
@@ -82,5 +84,7 @@ int main(int argc, char* argv[]){
     testTwoNeighBRs();
     testDistBRs();
 
+
+    cout << "all tests passed" << endl;
     return 0;
 }

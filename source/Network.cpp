@@ -212,8 +212,19 @@ int Network::neighNaive(int agent) const {
 }
 
 int Network::neighGood(int agent) const {
-    // use current implementation
-    return bestResponseTwoNeigh(agent);
+    auto imps = m_graph.neighImprovementOfTwoNeighs(agent);
+    auto bestResponse = -1;
+    auto bestGain = 0.0;
+    for(auto& imp : imps) {
+        auto realGain = imp.second - (this->*m_edgeCost)(m_graph.deg(imp.first) + 1);
+        if(realGain > bestGain){
+            bestResponse = imp.first;
+            bestGain = realGain;
+        } else if(realGain == bestGain){ // to have same tie breaker as other versions
+            bestResponse = std::min(bestResponse, imp.first);
+        }
+    }
+    return bestResponse;
 }
 
 int Network::distNaive(int agent) const {

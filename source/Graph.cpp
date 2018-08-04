@@ -136,45 +136,6 @@ int Graph::distImprovementOfEdge(int v, int additionalEdge, int maxLayer, const 
     return sumImprovement;
 }
 
-std::vector<int> Graph::distImprovementOfTwoNeighs(int v) const {
-
-    auto dist = std::vector<int>(m_n, -1);
-    std::vector<int> queue(m_n);
-    auto q_start = 0;
-    auto q_end = 0;
-
-    queue[q_end++] = v; // queue.push_back(v);
-    dist[v] = 0;
-
-    std::vector<std::set<int>> twoNeighsOnShortestPath(m_n);
-    while(q_start < q_end) // !queue.empty()
-    {
-        auto current = queue[q_start++]; // queue.pop_front()
-
-        if(dist[current] == 2)
-            twoNeighsOnShortestPath[current].insert(current);
-
-        // queue all neighbors
-        for (auto neighbor : m_adj[current]) {
-            if (dist[neighbor] == -1) {
-                dist[neighbor] = 1 + dist[current];
-                queue[q_end++] = neighbor; // queue.push_back(v);
-            }
-            if(dist[neighbor] == dist[current] + 1 && dist[current] >= 2)
-                for(auto each : twoNeighsOnShortestPath[current])
-                    twoNeighsOnShortestPath[neighbor].insert(each);
-        }
-    }
-
-    std::vector<int> improvement(m_n, 0);
-    for(auto& each : twoNeighsOnShortestPath)
-        for(auto twoNeigh : each)
-            improvement[twoNeigh]++;
-
-    return improvement;
-}
-
-
 Graph Graph::createCircle(int size) {
     auto circle = createPath(size);
     circle.connect(0, size-1);
@@ -234,6 +195,44 @@ std::ostream &operator<<(std::ostream &os, const Graph &graph) {
 
 
 // alternative stuff from here on
+
+std::vector<int> Graph::distImprovementOfTwoNeighs(int v) const {
+
+    auto dist = std::vector<int>(m_n, -1);
+    std::vector<int> queue(m_n);
+    auto q_start = 0;
+    auto q_end = 0;
+
+    queue[q_end++] = v; // queue.push_back(v);
+    dist[v] = 0;
+
+    std::vector<std::set<int>> twoNeighsOnShortestPath(m_n);
+    while(q_start < q_end) // !queue.empty()
+    {
+        auto current = queue[q_start++]; // queue.pop_front()
+
+        if(dist[current] == 2)
+            twoNeighsOnShortestPath[current].insert(current);
+
+        // queue all neighbors
+        for (auto neighbor : m_adj[current]) {
+            if (dist[neighbor] == -1) {
+                dist[neighbor] = 1 + dist[current];
+                queue[q_end++] = neighbor; // queue.push_back(v);
+            }
+            if(dist[neighbor] == dist[current] + 1 && dist[current] >= 2)
+                for(auto each : twoNeighsOnShortestPath[current])
+                    twoNeighsOnShortestPath[neighbor].insert(each);
+        }
+    }
+
+    std::vector<int> improvement(m_n, 0);
+    for(auto& each : twoNeighsOnShortestPath)
+        for(auto twoNeigh : each)
+            improvement[twoNeigh]++;
+
+    return improvement;
+}
 
 Graph Graph::shortestPathDAG(int v) const {
     auto DAG = Graph(m_n);
@@ -302,4 +301,30 @@ int Graph::sizeOfTwoNeighborhood(int v) const {
         if(dist >= 0 && dist <= 2)
             ++result;
     return result;
+}
+
+std::vector<std::pair<int, int>> Graph::neighImprovementOfTwoNeighs(int v) const {
+
+    auto& neighbors = m_adj[v];
+    auto done = std::vector<char>(m_n, false);
+    auto twoNeighs = std::vector<std::pair<int, int>>();
+    twoNeighs.reserve(2000);
+    done[v] = true;
+    for(auto each : neighbors)
+        done[each] = true;
+    for(auto each : neighbors){
+        for(auto twoNeigh : m_adj[each]){
+            if(!done[twoNeigh]){
+                done[twoNeigh] = true;
+                twoNeighs.emplace_back(twoNeigh, 0);
+            }
+        }
+    }
+    for(auto& neigh : twoNeighs){
+        int& imp = neigh.second;
+        for(auto each : m_adj[neigh.first])
+            if(!done[each])
+                ++imp;
+    }
+    return twoNeighs;
 }

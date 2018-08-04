@@ -26,9 +26,6 @@ public:
     // compute distance improvement if the edge (v,additionalEdge) is inserted; maxLayer should be max of oldDists
     int distImprovementOfEdge(int v, int additionalEdge, int maxLayer, const std::vector<int> & oldDists) const;
 
-    // returns vector with distImprovementOfEdge for all edges from v to every node in distance 2
-    // nodes not in distance 2 have 0 improvement
-    std::vector<int> distImprovementOfTwoNeighs(int v) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Graph& graph);
 
@@ -37,12 +34,19 @@ public:
     static Graph createPath(int size);
     static Graph createRandomTree(int size, int seed = 1337);
 
-    // functions for alternative BR versions
+    // functions for alternative dist BR versions
+
+    // returns vector with distImprovementOfEdge for all edges from v to every node in distance 2
+    // nodes not in distance 2 have 0 improvement
+    std::vector<int> distImprovementOfTwoNeighs(int v) const;
     Graph shortestPathDAG(int v) const;
     Graph& shortestPathDAGWithStaticMemory(int v) const;
     void fillShortestPathDAG(Graph& DAG, int v) const; // helper
     int reachable(int v) const;
+
+    // functions for alternative neigh BR versions
     int sizeOfTwoNeighborhood(int v) const;
+    std::vector<std::pair<int, int>> neighImprovementOfTwoNeighs(int v) const;
 
 protected:
     std::vector<std::vector<int>> m_adj; // adjacency list
