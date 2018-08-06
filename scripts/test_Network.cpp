@@ -32,7 +32,8 @@ void testTwoNeighBRs(){
 
     BestResponseFunction neighBRs[] = {
             &Network::neighNaive,
-            &Network::neighGood,
+            &Network::neighCurrent,
+            &Network::neighUnrolled,
     };
     for(auto BR_func : neighBRs){
         auto network = Network(Graph::createRandomTree(n, seed), BR_func, &Network::linearCost);

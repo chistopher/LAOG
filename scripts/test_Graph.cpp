@@ -1,6 +1,5 @@
 
 #include <iostream>
-#include <cassert>
 #include <algorithm>
 #include <numeric>
 
@@ -11,6 +10,15 @@ using namespace std;
 
 // change to test other starting graphs
 const auto seed = 1337;
+
+
+void assert(bool cond){
+    if(!cond){
+        cout << "assertion failed" << endl;
+        exit(1);
+    }
+}
+
 
 
 void testMaxLayer(){
@@ -74,6 +82,8 @@ int main(int argc, char* argv[]){
     testMaxLayer();
     testDistWithEdge();
     testDistImprovementOfTwoNeighs();
+
+    cout << "all tests passed" << endl;
 
     return 0;
 }

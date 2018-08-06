@@ -3,6 +3,7 @@
 #include <string>
 #include <chrono>
 #include <utility>
+#include <algorithm>
 
 #include <Graph.h>
 #include <Network.h>
@@ -19,7 +20,8 @@ vector<int> nodeRange = {200, 400, 600, 800, 1000, 2000, 3000, 4000, 5000, 6000,
 using BestResponseFunction = int(Network::*)(int) const;
 BestResponseFunction functions[] = {
         &Network::neighNaive,
-        &Network::neighGood,
+        &Network::neighCurrent,
+        &Network::neighUnrolled,
         &Network::distNaive,
         &Network::distImproOfEdge,
         &Network::distImproOfEdgeMaxLayer,
@@ -29,7 +31,8 @@ BestResponseFunction functions[] = {
 };
 string funcNames[] = {
         "neighNaive",
-        "neighGood",
+        "neighCurrent",
+        "neighUnrolled",
         "distNaive",
         "distImproOfEdge",
         "distImproOfEdgeMaxLayer",
@@ -39,15 +42,18 @@ string funcNames[] = {
 };
 
 // global state
-auto alpha = 0.4;
+auto useTree = true;
+auto alpha = 1.0;
 auto usedBR = functions[0];
-
-auto checksum = 0;
 
 
 auto measure_single(int n, int run){
-    auto network = Network(Graph::createCircle(n), usedBR, &Network::linearCost);
-    network.seed(n+run);
+    auto seed = n+run;
+    auto network = Network(
+            useTree ? Graph::createRandomTree(n, seed) : Graph::createCircle(n),
+            usedBR,
+            &Network::linearCost);
+    network.seed(seed);
     network.m_alpha = alpha;
     network.m_c = 0.0;
     network.m_greedy = false;
@@ -57,13 +63,13 @@ auto measure_single(int n, int run){
         if(network.performRound(true))
             break;
     auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<accuracy>(end-start).count();
 
-    checksum += network.m_round;
-    cout << n << "/" << run << "\trounds: " << network.m_round << "      ";
+    cout << n << "/" << run << "\trounds: " << network.m_round << "\tin " << duration << " ms     ";
     cout.flush();
     cout << '\r';
 
-    return std::chrono::duration_cast<accuracy>(end-start).count();
+    return duration;
 }
 
 auto measure_avg(int n){
@@ -87,11 +93,14 @@ int main(int argc, char* argv[]){
 
     // set global state
     auto funcNum = atoi(argv[1]);
-    alpha = funcNum < 2 ? 0.4 : 1.0;
+    auto firstDistIndex = find(functions, functions+numFuncs, &Network::distNaive) - functions;
+    useTree = funcNum >= firstDistIndex;
+    alpha = funcNum < firstDistIndex ? 0.4 : 1.0;
     usedBR = functions[funcNum];
 
     // log stuff
     cout << "using\t" << funcNames[funcNum] << '\n'
+         << "tree\t" << useTree << '\n'
          << "alpha\t" << alpha << '\n'
          << "reps\t" << repetitions << '\n'
          << "n\t";
@@ -100,12 +109,7 @@ int main(int argc, char* argv[]){
 
     // benchmark
     for(auto n : nodeRange){
-        cout << measure_avg(n) << "                       " << endl;
-
-        if(argc > 2){
-            clog << n << '\t' << checksum << endl;
-            checksum = 0;
-        }
+        cout << measure_avg(n) << "                                    " << endl;
     }
 
     return 0;

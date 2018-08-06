@@ -46,7 +46,8 @@ protected:
     int find_BR(const std::vector<int> &old_dists, T getDistGain) const;
 public:
     int neighNaive(int agent) const;
-    int neighGood(int agent) const;
+    int neighCurrent(int agent) const;
+    int neighUnrolled(int agent) const;
     int distNaive(int agent) const;
     int distImproOfEdge(int agent) const;
     int distImproOfEdgeMaxLayer(int agent) const;

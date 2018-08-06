@@ -211,7 +211,11 @@ int Network::neighNaive(int agent) const {
     return find_BR(old_dists, distGain);
 }
 
-int Network::neighGood(int agent) const {
+int Network::neighCurrent(int agent) const {
+    return bestResponseTwoNeigh(agent);
+}
+
+int Network::neighUnrolled(int agent) const {
     auto imps = m_graph.neighImprovementOfTwoNeighs(agent);
     auto bestResponse = -1;
     auto bestGain = 0.0;
