@@ -1,5 +1,11 @@
 #!/usr/bin/python3
 
+# prints metrics of a .dot file
+# plots pdf cdf and ccdf if additional parameter is supplied
+# uncomment diam and clustering if necessary;
+# for large files use the analyze function in plot_metrics/analyze (uses graph-tools c++ binding instead of networkx)
+
+
 import os.path
 
 import numpy
@@ -23,7 +29,7 @@ if __name__ == '__main__':
     print('edges                ', len(g.edges()))
     print('max degree           ', max(degrees))
     # print('diameter             ', nx.diameter(g))
-    print('average clustering   ', nx.average_clustering(g))
+    # print('average clustering   ', nx.average_clustering(g))
     numpy.seterr(divide='ignore', invalid='ignore')
     fit = powerlaw.Fit(degrees, discrete=True, verbose=False)
     print('power law exponent   ', fit.alpha)
