@@ -12,7 +12,9 @@ numRuns="2"
 
 function run {
     echo starting $2
-    eval $1 2> "${2}.log"
+    date >> "${2}.log"
+    eval $1 2>> "${2}.log"
+    date >> "${2}.log"
     echo finished ${2}
 }
 
@@ -22,7 +24,7 @@ mkdir ${dirname}
 
 for n in ${listOfN}
 do
-    for i in `seq 1 ${numRuns}`
+    for i in `seq 0 $((numRuns-1))`
     do
         filename="${dirname}/${n}_${i}"
         seed=$((i + n))

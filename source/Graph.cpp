@@ -149,7 +149,7 @@ Graph Graph::createPath(int size) {
     return path;
 }
 
-// Wilson's Algorithm for uniform random spanning trees
+// random walk algorithm for uniform random spanning trees
 Graph Graph::createRandomTree(int size, int seed) {
 
     // Create two partitions, S and T. Initially store all nodes in S.
