@@ -176,7 +176,8 @@ Analyzing a series of generates graphs is done with the scripts in ``./plot_metr
 Example:
 ```
 > ./plot_metrics/main.py dist_linear_1.0_0.0_tree
-... this may take a wile but we show a bunch of logging ...
+... this may take a while but we show a bunch of logging ...
+
 > ls dist_linear_1.0_0.0_tree | grep .pdf
 plot_KS.pdf
 plot_avg_degree.pdf
@@ -239,7 +240,7 @@ The following python packages are needed for the ``./print_info.py`` script:
 
 Each file in the ``./scripts/`` folder produces an independent executable.
 All executable link against the LOAG C++ Library.
-Static or dynamic linking (including the C and C++ libs) can be switched by uncommenting some (ca. 2) lines in the ```./CMakeLists.txt`` 
+Static or dynamic linking (including the C and C++ libs) can be switched by uncommenting some (ca. 2) lines in the ``./CMakeLists.txt``
 
 ## link triple
 
