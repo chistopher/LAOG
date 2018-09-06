@@ -48,7 +48,8 @@ Obtain Results:
 We provide an executable that does all this stuff with reasonable defaults (our CLI).
 The command line client exposes nearly all functionality of the ``Network`` class.
 
-## Tests
+## Tests [![Build Status](https://travis-ci.org/chistopher/LAOG.svg?branch=master)](https://travis-ci.org/chistopher/LAOG)
+
 
 The tests are implemented as two executables.
 
