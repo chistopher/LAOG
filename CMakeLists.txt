@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.2)
 project(master-thesis)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 11)
 # set(CMAKE_VERBOSE_MAKEFILE on)
 
 add_compile_options(

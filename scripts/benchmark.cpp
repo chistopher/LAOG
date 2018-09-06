@@ -13,8 +13,9 @@ using namespace std;
 // benchmark configuration
 const auto repetitions = 50;
 using accuracy = std::chrono::milliseconds;
+using rep = std::chrono::high_resolution_clock::rep;
 
-vector<int> nodeRange = {200, 400, 600, 800, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10'000};
+vector<int> nodeRange = {200, 400, 600, 800, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
 
 // command line choices
 using BestResponseFunction = int(Network::*)(int) const;
@@ -47,7 +48,7 @@ auto alpha = 1.0;
 auto usedBR = functions[0];
 
 
-auto measure_single(int n, int run){
+rep measure_single(int n, int run){
     auto seed = n+run;
     auto network = Network(
             useTree ? Graph::createRandomTree(n, seed) : Graph::createCircle(n),
@@ -72,7 +73,7 @@ auto measure_single(int n, int run){
     return duration;
 }
 
-auto measure_avg(int n){
+rep measure_avg(int n){
     auto avg = 0;
     for(auto i=0;i<repetitions;++i){
         avg += measure_single(n, i);

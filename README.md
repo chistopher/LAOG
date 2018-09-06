@@ -3,16 +3,20 @@
 
 # C++ Library
 
+Just look for yourself. It's only four files.
+
 Headers in ``./include/``.
 
 Sources in ``./source/``
 
 ## Graph
 
+A graph implementation with many modified and efficient BFS implementations.
+
 - undirected graph modelled as a directed graph in a adjacency list
+- vertices are identified by a zero based index in \[0, size)
 - static methods prefixed with ``create`` return special instances
 - otherwise use the constructor ``Graph::Graph(int size)`` and connect vertices with ``Graph::connect(int u, int v)``
-- vertices are identified by a zero based index in \[0, size)
 
 ## Network
 
@@ -57,7 +61,7 @@ Detailed information is meant to be obtained with a debugger.
 
 ## Dependencies
 
-- C++14
+- C++11
 - CMake 3.2 or higher
 - OS: tested on Ubuntu, Windows and OSX
 
@@ -71,6 +75,12 @@ The following bash commands will build all executables (CLI, Tests, Benchmark, e
 > make -j 4
 ```
 
+On Windows we recommend using one of the following setups
+- the CMake GUI and Visual Studio
+- CLion's integrated CMake support and GCC on MinGW
+- the Windows Subsystem for Linux (WSL) with Ubuntu 16.04 or 18.04 and GCC or Clang
+
+All six configurations for Windows were observed to work.
 
 
 # Command Line Client
@@ -110,7 +120,7 @@ The scripts generate a folder named after the most important configuration param
 An instance is named after the size of the network and the index of the run (e.g. ``1000_3``).
 For each instance we save a ``.log`` and a ``.dot`` file.
 The logs can be inspected live.
-This is especially helpful when investigation the progress of a long computation on a SLURM computing cluster.
+This is especially helpful when investigating the progress of a long computation on a SLURM computing cluster.
 More useful bash commands for SLURM are defined in ``./fsoc/cancel``.
 
 
