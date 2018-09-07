@@ -1,14 +1,15 @@
 #!/bin/bash
 
-listOfN=$(seq 1000 500 1500)
+listOfN=$(seq 1000 1000 10000)
 
-dist="two"
+dist="dist"
 cost="linear"
-a="0.46"
-c="0.0"
-start="circle"
+a="1"
+c="0"
+start="tree"
+greedy="0"
 
-numRuns="2"
+numRuns="5"
 
 function run {
     echo starting $2
@@ -28,7 +29,7 @@ do
     do
         filename="${dirname}/${n}_${i}"
         seed=$((i + n))
-        run "${1} -n ${n} -dist ${dist} -cost ${cost} -a ${a} -c ${c} -start ${start} -seed ${seed} -file ${filename}" ${filename} &
+        run "${1} -n ${n} -dist ${dist} -cost ${cost} -a ${a} -c ${c} -start ${start} -greedy ${greedy} -seed ${seed} -file ${filename}" ${filename} &
     done
 done
 wait

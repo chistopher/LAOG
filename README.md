@@ -4,6 +4,8 @@
 # C++ Library
 
 Just look for yourself. It's only four files.
+Or keep reading.
+The two classes (``Graph``, ``Network``) are explained below.
 
 Headers in ``./include/``.
 
@@ -60,15 +62,20 @@ A successful run of all tests outputs ``all tests passed``.
 The only output if a test fails is ``assertion failed``.
 Detailed information is meant to be obtained with a debugger.
 
+The CI builds **all** executables and runs the tests for
+- OSX and AppleClang 9.0
+- Ubuntu and GCC 5.5
+- Ubuntu and Clang 5.0
+
 ## Dependencies
 
 - C++11
 - CMake 3.2 or higher
-- OS: tested on Ubuntu, Windows and OSX
+- OS: Ubuntu, Windows, or OSX (others at your own risk)
 
 ## Build Instructions
-The following bash commands will build all executables (CLI, Tests, Benchmark, etc.) in a subdirectory called *build*:
-```bash
+The following bash commands will build all executables (CLI, Tests, Benchmark, etc.) in the subdirectory ``./build/``:
+```
 > cd ${projectFolder}
 > mkdir build
 > cd build
@@ -84,12 +91,13 @@ On Windows we recommend using one of the following setups
 All six configurations for Windows were observed to work.
 
 
-# Command Line Client
+# Command-Line Client
 
-Implemented in ``./scripts/laogen.cpp``.
-The executable will be called ``./build/laogen`` if built with the commands stated above.
+The CLI is the recommended starting point if you want to explore the functionality of this repository.
+It is implemented in ``./scripts/laogen.cpp``.
+The executable will be called ``./build/laogen`` when built with the commands stated above.
 
-Parameters and usage of the CLI is provided with the executable.
+Parameters and usage of the CLI are provided by the executable.
 Try out the help parameter! The output should look something like
 ```
 > ./build/laogen --help
@@ -109,10 +117,10 @@ usage: ./laogen [-n anInt]                // number of nodes               defau
 # Test Series Scripts
 
 The test series generation scripts require a compiled version of the CLI to generate the graphs.
-It is required as the first and only parameter.
+Pass it as the first and only argument.
 A precompiled executable of the CLI for current Unix systems can be found at ``./fsoc/laogen``.
 It is statically linked against the LAOG-Library, the C standard library, and the C++ standard library.
-Since the pseudo-randomness of the CLI is not cross-plattform, we strongly recommend to use and archive a static executable (or just use our precompiled one).
+Since the pseudo-randomness of our implementation is not cross-plattform, we strongly recommend to use and archive a static executable (or just use our precompiled one).
 
 
 ## File Structure
@@ -180,7 +188,12 @@ graph graphname {
 
 ## Plotting and Analyzing
 
-Analyzing a series of generates graphs is done with the scripts in ``./plot_metrics/``. The scripts cache
+Analyzing a series of generates graphs is done with the scripts in ``./plot_metrics/``.
+The powerlaw package may print one or two arithmetical warnings while it tries to find the best fit.
+This is totally normal and is explained by their developer in [this issue](https://github.com/jeffalstott/powerlaw/issues/25).
+
+Our scripts cache the results for each graph and analyzed folder.
+You can cancel and restart the script at any time.
 - the metrics per ``<size>_<run>.dot`` are saved in ``<size>_<run>.json`` because they take hella long to compute even with C++ based graph-tool package
 - the metrics per analyzed folder are cached in a ``metrics.json`` to allow quick feedback when changing the plotting code
 
@@ -205,7 +218,7 @@ plot_x_min.pdf
 
 Quick information for one specific graph can be obtained with the ``print_info.py`` script.
 First argument is a ``.dot`` file.
-If an optional second argument is supplied, the script generates pdf, cdf, and ccdf of degree distribution of the input graph.
+If an optional second argument is supplied, the script generates PDF, CDF, and CCDF for the degree distribution of the input graph.
 The files share the base name with the supplied ``.dot`` and append ``_[pdf|cdf|ccdf].pdf``.
 Uncomment two lines in the script to compute diameter and clustering. This has a high performance impact and becomes nearly intractable for n>10k.
 
@@ -284,6 +297,7 @@ first arg no valid bestResponse function
     6 distWithSets
     7 distDAGandBFS
     8 distDAGandBFSStatic
+
 > ./build/benchmark 4
 using   distImproOfEdge
 tree    1
