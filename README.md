@@ -117,7 +117,8 @@ usage: ./laogen [-n anInt]                // number of nodes               defau
 # Test Series Scripts
 
 The test series generation scripts require a compiled version of the CLI to generate the graphs.
-Pass it as the first and only argument.
+Pass it as the first and only argument to the bash script.
+The SLURM script takes no arguments, but expects the executable in the working directory. 
 A precompiled executable of the CLI for current Unix systems can be found at ``./fsoc/laogen``.
 It is statically linked against the LAOG-Library, the C standard library, and the C++ standard library.
 Since the pseudo-randomness of our implementation is not cross-plattform, we strongly recommend to use and archive a static executable (or just use our precompiled one).
@@ -130,7 +131,7 @@ An instance is named after the size of the network and the index of the run (e.g
 For each instance we save a ``.log`` and a ``.dot`` file.
 The logs can be inspected live.
 This is especially helpful when investigating the progress of a long computation on a SLURM computing cluster.
-More useful bash commands for SLURM are defined in ``./fsoc/cancel``.
+More useful bash commands for SLURM are defined in ``./fsoc/info_commands``.
 
 
 ## Generation Scripts

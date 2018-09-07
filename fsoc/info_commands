@@ -1,0 +1,24 @@
+
+alias info="sinfo -o \"%N %C %O %e %g\" -n"
+
+# first arg: test series folder
+# second arg: network size n
+# returns how many instances of that size are done
+function many {
+        ls $1 | grep -c --regex=${2}_.*dot -
+}
+
+# first arg: test series folder
+# returns a list with all running/done job-steps (=one for each network size)
+# distplays number of done instances and finishing time of first instance
+function stats {
+        for i in `seq 51000 1000 100000`;
+        do
+                num="$(many ${1} ${i})"
+                if [ "0" != "$num" ]
+                then
+                        beg="$(grep CEST -m 1 ${1}/${i}_0.log)"
+                        echo "$i        $num    $beg"
+                fi
+        done
+}
