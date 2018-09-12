@@ -5,7 +5,7 @@ alias info="sinfo -o \"%N %C %O %e %g\" -n"
 # second arg: network size n
 # returns how many instances of that size are done
 function many {
-        ls $1 | grep -c --regex=${2}_.*dot -
+        ls $1 | grep -c -x --regex=${2}_.*dot -
 }
 
 # first arg: test series folder
