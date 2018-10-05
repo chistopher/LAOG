@@ -176,6 +176,50 @@ void Network::save_gexf(std::string name) const{
 }
 
 
+Network::Stats Network::stats() const {
+    const auto n = graph().n();
+
+    auto worstRatio = 1.0;
+    auto sumRatios = 0.0;
+    auto stable = 0.0;
+
+    for(auto agent = 0; agent<n; ++agent){
+        if(graph().neighbors(agent).empty()){
+            sumRatios += 1.0;
+            ++stable;
+            continue;
+        }
+
+        // compute current cost
+        const auto dists = graph().distances(agent);
+        auto distCost = 0;
+        auto linkCost = 0.0;
+        for(auto d : dists)
+            distCost += std::max(0, d);
+        for(auto neigh : graph().neighbors(agent))
+            linkCost += (this->*m_edgeCost)(graph().deg(neigh));
+        const auto currentCost = distCost + linkCost;
+
+        // compute BR
+        auto best_response = (this->*m_bestResponse)(agent);
+        if(best_response == -1){
+            sumRatios += 1.0;
+            ++stable;
+            continue;
+        }
+
+        // eval ratio
+        auto improvement = graph().distImprovementOfEdge(agent, best_response, n, dists)
+                           - (this->*m_edgeCost)(graph().deg(best_response + 1));
+
+        auto ratio = currentCost / (currentCost-improvement);
+        worstRatio = std::max(ratio, worstRatio);
+        sumRatios += ratio;
+    }
+    return {worstRatio, sumRatios/n, stable/n};
+}
+
+
 // alternative functions helper
 template<typename T>
 int Network::find_BR(const std::vector<int> &old_dists, T getDistGain) const {

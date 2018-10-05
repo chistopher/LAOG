@@ -40,6 +40,13 @@ public:
     void save_dot(std::string name = "") const;
     void save_gexf(std::string name = "") const;
 
+    struct Stats{
+        double approx_ratio;
+        double avg_approx;
+        double stable_ratio;
+    };
+    Stats stats() const;
+
     // alternative bestResponse implementations
 protected:
     template<typename T> // takes lambda as move evaluator

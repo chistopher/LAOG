@@ -6,6 +6,7 @@
 #include <random>
 #include <list>
 #include <set>
+#include <fstream>
 
 
 Graph::Graph(int size) {
@@ -181,6 +182,39 @@ Graph Graph::createRandomTree(int size, int seed) {
     }
     return tree;
 }
+
+Graph Graph::fromTxt(std::string file, char sep) {
+
+    std::vector<std::pair<int,int>> edges;
+
+    // read file
+    std::ifstream f(file);
+    std::string line;
+    while(std::getline(f, line)){
+        if(line.empty() || line.front() == '#')
+            continue;
+        auto pos = line.find(sep);
+        auto from = std::stoi(line.substr(0, pos));
+        auto to = std::stoi(line.substr(pos+1));
+        edges.emplace_back(std::max(from,to), std::min(from,to));
+    }
+
+    // find size
+    std::sort(edges.begin(), edges.end());
+    auto maxNode = edges.back().first;
+
+    // create graph
+    auto g = Graph(maxNode+1);
+    for(auto & e : edges){
+        if(not g.isConnected(e.first, e.second)){
+            g.connect(e.first, e.second);
+            g.connect(e.second, e.first);
+        }
+    }
+
+    return g;
+}
+
 
 std::ostream &operator<<(std::ostream &os, const Graph &graph) {
     os << "graph graphname {" << '\n';

@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <map>
+#include <string>
 
 class Graph
 {
@@ -33,6 +34,10 @@ public:
     static Graph createCircle(int size);
     static Graph createPath(int size);
     static Graph createRandomTree(int size, int seed = 1337);
+    // expects the nodes to be numbered from 0 to n-1
+    // lines with # are comments
+    // edges are given as "fromID   toID"
+    static Graph fromTxt(std::string file, char sep = '\t');
 
     // functions for alternative dist BR versions
 
