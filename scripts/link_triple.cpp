@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <fstream>
 #include <utility>
-#include <map>
+#include <set>
 #include <cassert>
 
 #include <Graph.h>
@@ -22,26 +22,22 @@ int rand(int max){
 
 int main(int argc, char* argv[]){
 
-    if(argc < 3){
-        cout << "too few params" << endl;
-        return 0;
-    }
-
     mt19937 gen;
     uniform_real_distribution<> dist(0, 0.999999999);
 
-    auto max_n = stoi(argv[1]);
-    auto u = stod(argv[2]);
+    auto max_n = (int)1e5;
+    auto u = 0.7;
 
     auto graph = Graph(1);
 
     // not sure if set or multiset -- multiset benefits potential edges with multiple common neighbors
     auto potentialEdges = vector<pair<int,int>>();
-    auto isPotential = map<pair<int,int>, bool>();
+    auto connections = set<pair<int,int>>();
 
     while(graph.n() < max_n){
 
         if(dist(gen) > u){
+            if((graph.n()+1)%1000==0) cerr << graph.n()+1 << endl;
             /*
              * With probability 1-u introduce a new vertex in the
              * graph, create an edge from the new vertex to a vertex j selected
@@ -53,54 +49,46 @@ int main(int argc, char* argv[]){
             graph.insertVertex();
             for(auto neigh : graph.neighbors(to)){
                 pair<int,int> edge = {neigh, from};
-                if(isPotential.find(edge) == isPotential.end()){
-                    potentialEdges.emplace_back(edge);
-                    isPotential[edge] = true;
-                }
+                potentialEdges.emplace_back(edge);
+                connections.insert(edge);
             }
             graph.connect(from, to);
+            connections.emplace(to,from);
         }
         else {
             /*
              * With probability u convert one potential edge selected
              * at random into an edge.
              */
-            bool done = false;
-            while(!done && !potentialEdges.empty()){
-                auto edge_index = rand(potentialEdges.size());
-                auto edge = potentialEdges[edge_index];
-                auto from = edge.first;
-                auto to = edge.second;
+            if(potentialEdges.empty())
+                continue;
 
-                // remove chosen edge
-                potentialEdges[edge_index].first = potentialEdges.back().first;
-                potentialEdges[edge_index].second = potentialEdges.back().second;
-                potentialEdges.resize(potentialEdges.size()-1);
+            auto edge_index = rand(potentialEdges.size());
+            auto edge = potentialEdges[edge_index];
+            auto from = edge.first;
+            auto to = edge.second;
 
-                //if(graph.isConnected(from, to))
-                    //continue;
+            // remove chosen edge
+            potentialEdges[edge_index] = potentialEdges.back();
+            potentialEdges.pop_back();
 
-                // create new potential edges
-                for(auto neigh : graph.neighbors(from)){
-                    pair<int,int> edge = {to,neigh};
-                    if(edge.first > edge.second) swap(edge.first, edge.second);
-                    if(isPotential.find(edge) == isPotential.end() && !graph.isConnected(to, neigh)){
-                        potentialEdges.push_back(edge);
-                        isPotential[edge] = true;
-                    }
+            // create new potential edges
+            for(auto neigh : graph.neighbors(from)){
+                pair<int,int> edge = minmax(to,neigh);
+                if(connections.find(edge) == connections.end()){
+                    potentialEdges.push_back(edge);
+                    connections.insert(edge);
                 }
-                for(auto neigh : graph.neighbors(to)){
-                    pair<int,int> edge = {from,neigh};
-                    if(edge.first > edge.second) swap(edge.first, edge.second);
-                    if(isPotential.find(edge) == isPotential.end() && !graph.isConnected(from, neigh)){
-                        potentialEdges.push_back(edge);
-                        isPotential[edge] = true;
-                  }
-                }
-
-                graph.connect(from, to);
-                done = true;
             }
+            for(auto neigh : graph.neighbors(to)){
+                pair<int,int> edge = minmax(from,neigh);
+                if(connections.find(edge) == connections.end()){
+                    potentialEdges.push_back(edge);
+                    connections.insert(edge);
+              }
+            }
+
+            graph.connect(from, to);
         }
     }
 
